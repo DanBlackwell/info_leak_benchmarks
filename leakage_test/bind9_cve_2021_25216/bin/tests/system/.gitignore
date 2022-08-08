@@ -1,0 +1,12 @@
+__pycache__
+dig.out*
+rndc.out*
+nsupdate.out*
+named.lock
+named.pid
+named.run
+/feature-test
+/test.output.*
+/systests.output
+/random.data
+parallel.mk
