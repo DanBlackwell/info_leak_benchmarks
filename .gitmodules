@@ -1,0 +1,3 @@
+[submodule "leakage_test/NetworkManager_CVE-2011-1943"]
+	path = leakage_test/NetworkManager_CVE-2011-1943
+	url = https://gitlab.freedesktop.org/NetworkManager/NetworkManager

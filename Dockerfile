@@ -23,6 +23,7 @@ RUN apt-get update && \
     apt-utils apt-transport-https ca-certificates gnupg dialog \
     libpixman-1-dev \
     gnuplot-nox \
+    gtk-doc-tools autopoint intltool libdbus-glib-1-dev \
     && rm -rf /var/lib/apt/lists/*
 
 RUN echo "deb http://apt.llvm.org/focal/ llvm-toolchain-focal-12 main" >> /etc/apt/sources.list && \
@@ -80,6 +81,10 @@ WORKDIR /app/AFL_info_leakage
 RUN ls && make clean && make && make install
 
 COPY ./leakage_test /app/leakage_test
+
+WORKDIR /app/leakage_test/NetworkManager_CVE-2011-1943
+RUN afl-clang-fast fuzz.c ../memory.c ../decode_inputs.c ../base64.c ../json.c libnm-util/nm-param-spec-specialized.c libnm-util/nm-setting.c libnm-util/nm-setting-vpn.c -Ilibnm-util -I/usr/include/glib-2.0 -I/usr/lib/x86_64-linux-gnu/glib-2.0/include/ -Iinclude -I/usr/include/dbus-1.0/ -lglib-2.0 -ldbus-glib-1 -lgobject-2.0 -I../ -lm -o fuzz
+
 # WORKDIR /app/leakage_test/postgres-cve-2021-3393
 # RUN chown -R postgres /app
 # 

@@ -57,7 +57,7 @@ void *my_malloc(size_t bytes) {
 }
 
 void fill_stack() {
-  short *__stack_bottom = (short *)get_min_stack_bottom(); 
+  short *__stack_bottom = (short *)get_cur_stack_bottom(); 
   short __stack_tmp;
   for (short *stack_loc = &__stack_tmp; stack_loc > __stack_bottom; stack_loc--) {
     *stack_loc = rand();
