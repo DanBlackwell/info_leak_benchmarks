@@ -3,11 +3,13 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <stdint.h>
+extern "C" {
 #include "json.h"
 #include "base64.h"
 #include "atalk.h"
 #include "decode_inputs.h"
 #include "memory.h"
+}
 
 int atalk_getname(atptr sock, atptr &uaddr, int peer) {
 /*

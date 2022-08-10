@@ -83,7 +83,23 @@ RUN ls && make clean && make && make install
 COPY ./leakage_test /app/leakage_test
 
 WORKDIR /app/leakage_test/NetworkManager_CVE-2011-1943
-RUN afl-clang-fast fuzz.c ../memory.c ../decode_inputs.c ../base64.c ../json.c libnm-util/nm-param-spec-specialized.c libnm-util/nm-setting.c libnm-util/nm-setting-vpn.c -Ilibnm-util -I/usr/include/glib-2.0 -I/usr/lib/x86_64-linux-gnu/glib-2.0/include/ -Iinclude -I/usr/include/dbus-1.0/ -lglib-2.0 -ldbus-glib-1 -lgobject-2.0 -I../ -lm -o fuzz
+RUN ./build.sh
+
+WORKDIR /app/leakage_test/atalk
+RUN ./build.sh
+
+WORKDIR /app/leakage_test/bind9_cve_2021_25216
+RUN ./build.sh
+
+WORKDIR /app/leakage_test/rds_kernel_CVE-2019-16714
+RUN ./build.sh
+
+WORKDIR /app/leakage_test/underflow
+RUN ./build.sh
+
+#WORKDIR /app/leakage_test/postgres-cve-2021-3393
+#RUN ./build.sh
+
 
 # WORKDIR /app/leakage_test/postgres-cve-2021-3393
 # RUN chown -R postgres /app

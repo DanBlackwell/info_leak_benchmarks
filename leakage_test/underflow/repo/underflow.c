@@ -40,12 +40,12 @@ int main(void) {
   uint8_t *public_in, *secret_in;
   uint32_t public_len, secret_len;
 
-  find_public_and_secret_inputs(data, length,
+  find_public_and_secret_inputs((const char *)data, length,
                                 &public_in, &public_len,
                                 &secret_in, &secret_len);
   
   if (public_len != sizeof(ppos)) {
-    printf("expected public_len == %u, got %u\n", sizeof(ppos), public_len);
+    printf("expected public_len == %lu, got %u\n", sizeof(ppos), public_len);
     return 1;
   }
 
