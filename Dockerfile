@@ -97,9 +97,11 @@ RUN ./build.sh
 WORKDIR /app/leakage_test/underflow
 RUN ./build.sh
 
-#WORKDIR /app/leakage_test/postgres-cve-2021-3393
-#RUN ./build.sh
+WORKDIR /app/leakage_test/postgres-cve-2021-3393
+RUN ./build.sh
 
+WORKDIR /app/leakage_test/OpenSSL_CVE-2014-0160
+RUN ./build.sh
 
 # WORKDIR /app/leakage_test/postgres-cve-2021-3393
 # RUN chown -R postgres /app
