@@ -1,5 +1,12 @@
 #include <iostream>
 #include <string>
+#include <cstdio>
+extern "C" {
+  #include <unistd.h>
+  #include <stdint.h>
+  #include <stdlib.h>
+  #include "decode_inputs.h"
+}
 
 class ErrorLog {
 public:
@@ -86,11 +93,39 @@ public:
     }
 };
 
+union converter {
+  long intVal;
+  double floatVal;
+} converter;
+
 int main(void) {
+    char *Data = (char *)malloc(1024*1024+1);
+    int length = read(STDIN_FILENO, Data, 1024*1024+1);
+    if (length == -1 || length == 1024*1024+1) {
+        printf("Error! too long\n");
+        exit(1);
+    }
+  
+    uint8_t *public_in, *secret_in;
+    uint32_t public_len, secret_len;
+    find_public_and_secret_inputs(Data, length, &public_in, &public_len, &secret_in, &secret_len);
+
+    converter.intVal = 0;
+    for (int i = 0; i < (secret_len < 8 ? secret_len : 8); i++) {
+        converter.intVal |= secret_in[i] << (8 * i);
+    }
+    double deposit = converter.floatVal;
+    
+    converter.intVal = 0;
+    for (int i = 0; i < (public_len < 8 ? public_len : 8); i++) {
+        converter.intVal |= public_in[i] << (8 * i);
+    }
+    double transfer = converter.floatVal;
+  
     Account account = Account();
-    account.deposit(100);
+    account.deposit(deposit);
     AccountOwner owner = AccountOwner(account);
     Beneficiary beneficiary = Beneficiary();
-    owner.payBeneficiary(beneficiary, 150);
+    owner.payBeneficiary(beneficiary, transfer);
 }
 

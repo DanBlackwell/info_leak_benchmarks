@@ -1,6 +1,13 @@
 #include <string>
 #include <iostream>
 #include <cstdio>
+#include <cstdlib>
+extern "C" {
+  #include <stdint.h>
+  #include <unistd.h>
+  #include <string.h>
+  #include "decode_inputs.h"
+}
 
 class PasswordManager {
 private:
@@ -14,6 +21,13 @@ public:
 		password = "supersecret";
 		invalidTries = 0;
 		maximumTries = 10; // THIS IS THE SECRET!!!
+		loggedIn = false;
+	}
+
+	PasswordManager(int max) {
+		password = "supersecret";
+		invalidTries = 0;
+		maximumTries = max;
 		loggedIn = false;
 	}
 
@@ -32,30 +46,45 @@ public:
 	}
 };
 
-
 int main(void) {
-	std::string exitKeyword = "exit";
+  char *Data = (char *)malloc(1024*1024+1);
+  int length = read(STDIN_FILENO, Data, 1024*1024+1);
+  if (length == -1 || length == 1024*1024+1) {
+    printf("Error! too long\n");
+    exit(1);
+  }
+  
+  uint8_t *public_in, *secret_in;
+  uint32_t public_len, secret_len;
+  find_public_and_secret_inputs(Data, length, &public_in, &public_len, &secret_in, &secret_len);
+
+
+  int passwordAttempts = 0;
+  for (int i = 0; i < (secret_len < 4 ? secret_len : 4); i++) {
+      passwordAttempts |= secret_in[i] << 8 * i;
+  }
+
+	const char *exitKeyword = "exit";
 	bool exit = false;
 	
-	PasswordManager pm = PasswordManager();
+	PasswordManager pm = PasswordManager(passwordAttempts);
 	
 	std::cout << "To exit, type: " << exitKeyword << std::endl;
 
-	std::string input;
+  char *str = (char *)malloc(public_len + 1);
+  memcpy(str, public_in, public_len + 1);
+  str[public_len] = 0; // terminate the string
 
-	while (!exit) {
+  char *input, *temp;
+  input = strtok_r(str, "\n", &temp);
+  do {
 		std::cout << "Enter password:" << std::endl;
-		std::getline(std::cin, input);
 
-		if (!std::cin) {
-			std::cout << "Run completed, run again" << std::endl;
-			return 0;
-		}
-
+    exit |= strcmp(input, exitKeyword) == 0;
 		exit |= input == exitKeyword;
 		pm.tryLogin(input);
-		
-		std::cout << "Run completed, run again" << std::endl;
-	}
-}
+  } while ((input = strtok_r(NULL, "\n", &temp)) != NULL);
 
+  std::cout << "Run completed, run again" << std::endl;
+	return 0;
+}

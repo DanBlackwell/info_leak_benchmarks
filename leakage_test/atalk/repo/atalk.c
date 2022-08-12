@@ -50,9 +50,9 @@ out:
 int main(int argc, char *argv[])
 {
 
-  char *Data = (char *)malloc(65536);
-  int length = read(STDIN_FILENO, Data, 65536);
-  if (length == -1 || length == 65536) {
+  char *Data = (char *)malloc(1024*1024+1);
+  int length = read(STDIN_FILENO, Data, 1024*1024+1);
+  if (length == -1 || length == 1024*1024+1) {
     printf("Error! too long\n");
     exit(1);
   }
