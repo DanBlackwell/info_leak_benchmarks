@@ -75,6 +75,7 @@ RUN chown -R postgres /usr/local/pgsql
 # CMD tail -f /dev/null
 
 COPY ./Dockerfile /app/
+COPY ./begin_fuzzing.sh /app/
 
 COPY ./AFL_info_leakage /app/AFL_info_leakage
 WORKDIR /app/AFL_info_leakage
@@ -101,6 +102,15 @@ WORKDIR /app/leakage_test/postgres-cve-2021-3393
 RUN ./build.sh
 
 WORKDIR /app/leakage_test/OpenSSL_CVE-2014-0160
+RUN ./build.sh
+
+WORKDIR /app/leakage_test/IFSpec_banking/
+RUN ./build.sh
+
+WORKDIR /app/leakage_test/IFSpec_password_check/
+RUN ./build.sh
+
+WORKDIR /app/leakage_test/IFSpec_reviewers/
 RUN ./build.sh
 
 # WORKDIR /app/leakage_test/postgres-cve-2021-3393

@@ -64,18 +64,26 @@ int main(void) {
   uint8_t *public_in, *secret_in;
   uint32_t public_len, secret_len;
   find_public_and_secret_inputs(Data, length, &public_in, &public_len, &secret_in, &secret_len);
-
-  int maxSecrets = secret_len % 4 == 0 ? secret_len / 4 : (secret_len / 4) + 1;
+ 
+  if (public_len < 2) { printf("public input needs at least 2 bytes\n"); return 1; }
 
   int secretPos = 0, publicPos = 0;
-  for (int i = 0; i < maxSecrets; i++) {
-    secretPos = 4 * i;
+  int numReviewers = public_in[0] % 7 + 1;
+  for (int i = 0; i < numReviewers; i++) {
 
     int reviewerID = 0;
     int secLen = secret_len - secretPos;
  //   printf("secret_len: %d, maxSecrets: %d, secLen: %d\n", secret_len, maxSecrets, secLen);
-    for (int j = secretPos; j < secretPos + (secLen < 4 ? secLen : 4); j++) {
+    if (secLen == 0) {
+      reviewerID = i;
+    } else {
+      int len = secLen < 4 ? secLen : 4;
+
+      for (int j = secretPos; j < secretPos + len; j++) {
         reviewerID |= secret_in[j] << 8 * (j - secretPos);
+      }
+
+      secretPos += len;
     }
 
     int reviewScore = 1;
@@ -104,5 +112,6 @@ int main(void) {
     rp.addReview(reviewerID, reviewScore, reviewComment);
   }
 
-	rp.sendNotifications();
+  rp.sendNotifications();
 }
+

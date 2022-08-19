@@ -11,7 +11,7 @@ extern "C" {
 class ErrorLog {
 public:
     void logError(std::string message) {
-        std::cout << message << std::endl;
+        std::cerr << message << std::endl;
     }
 };
 
@@ -43,7 +43,7 @@ public:
                 logTransaction(false);
                 return true;
             } else {
-                char buf[120];
+                char buf[2048];
                 sprintf(buf, "Account has insufficient funds to withdraw %.2f", amount);
                 logError(buf);
                 return false;
@@ -60,7 +60,7 @@ public:
 private:
     void logTransaction(bool isDeposit) {
         std::string transaction = isDeposit ? "Deposit" : "Withdrawal";
-        char buf[120];
+        char buf[2048];
         sprintf(buf, "%s completed, new balance: %.2f", transaction.c_str(), balance);
         transactionLog.logTransaction(buf);
     }
@@ -94,7 +94,7 @@ public:
 };
 
 union converter {
-  long intVal;
+  char bytes[sizeof(double)];
   double floatVal;
 } converter;
 
@@ -105,23 +105,21 @@ int main(void) {
         printf("Error! too long\n");
         exit(1);
     }
-  
+
     uint8_t *public_in, *secret_in;
     uint32_t public_len, secret_len;
     find_public_and_secret_inputs(Data, length, &public_in, &public_len, &secret_in, &secret_len);
 
-    converter.intVal = 0;
     for (int i = 0; i < (secret_len < 8 ? secret_len : 8); i++) {
-        converter.intVal |= secret_in[i] << (8 * i);
+        converter.bytes[i] = secret_in[i];
     }
     double deposit = converter.floatVal;
-    
-    converter.intVal = 0;
+
     for (int i = 0; i < (public_len < 8 ? public_len : 8); i++) {
-        converter.intVal |= public_in[i] << (8 * i);
+        converter.bytes[i] = public_in[i];
     }
     double transfer = converter.floatVal;
-  
+
     Account account = Account();
     account.deposit(deposit);
     AccountOwner owner = AccountOwner(account);
