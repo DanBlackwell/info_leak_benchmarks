@@ -57,11 +57,14 @@ void *my_malloc(size_t bytes) {
 }
 
 void fill_stack() {
-  uint64_t *__stack_bottom = (uint64_t *)get_cur_stack_bottom(); 
+  uint64_t *__stack_bottom = (uint64_t *)get_cur_stack_bottom();
   uint64_t repeatedVal = (uint64_t)rand() << 48 | (uint64_t)rand() << 32 | (uint64_t)rand() << 16 | (uint64_t)rand();
-  //short __stack_tmp;
-  //for (short *stack_loc = &__stack_tmp; stack_loc > __stack_bottom; stack_loc--) {
-  for (uint64_t *stack_loc = &repeatedVal - 1; stack_loc > __stack_bottom; stack_loc--) {
+  uint64_t *stack_loc;
+
+  for (stack_loc = &repeatedVal - 1; stack_loc > __stack_bottom; stack_loc--) {
     *stack_loc = repeatedVal;
   }
-}
+
+  stack_loc = (uint64_t *)repeatedVal;
+  __stack_bottom = (uint64_t *)repeatedVal;
+}  
