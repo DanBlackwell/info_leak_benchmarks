@@ -1,0 +1,3 @@
+[submodule "AFL_info_leakage"]
+	path = AFL_info_leakage
+	url = git@github.com:DanBlackwell/AFLplusplus_hashfuzz.git

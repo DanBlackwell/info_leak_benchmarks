@@ -24,6 +24,7 @@ RUN apt-get update && \
     libpixman-1-dev \
     gnuplot-nox \
     gtk-doc-tools autopoint intltool libdbus-glib-1-dev \
+    valgrind uuid-dev default-jre python3 zip \
     && rm -rf /var/lib/apt/lists/*
 
 RUN echo "deb http://apt.llvm.org/focal/ llvm-toolchain-focal-12 main" >> /etc/apt/sources.list && \
@@ -76,10 +77,21 @@ RUN chown -R postgres /usr/local/pgsql
 
 COPY ./Dockerfile /app/
 COPY ./begin_fuzzing.sh /app/
+COPY ./Grammar-Mutator /app/
+COPY ./sql_grammar.json /app/
 
 COPY ./AFL_info_leakage /app/AFL_info_leakage
 WORKDIR /app/AFL_info_leakage
 RUN ls && make clean && make && make install
+
+WORKDIR /app/
+
+RUN wget https://www.antlr.org/download/antlr-4.8-complete.jar && \
+    cp -f antlr-4.8-complete.jar /usr/local/lib
+
+RUN pushd /app/AFL_info_leakage/custom_mutators/Grammar-Mutator && \
+    make GRAMMAR_FILE=grammars/sql_grammar.json && \
+    popd
 
 COPY ./leakage_test /app/leakage_test
 
