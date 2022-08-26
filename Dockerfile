@@ -76,9 +76,6 @@ RUN chown -R postgres /usr/local/pgsql
 # CMD tail -f /dev/null
 
 COPY ./Dockerfile /app/
-COPY ./begin_fuzzing.sh /app/
-COPY ./Grammar-Mutator /app/
-COPY ./sql_grammar.json /app/
 
 COPY ./AFL_info_leakage /app/AFL_info_leakage
 WORKDIR /app/AFL_info_leakage
@@ -124,6 +121,19 @@ RUN ./build.sh
 
 WORKDIR /app/leakage_test/IFSpec_reviewers/
 RUN ./build.sh
+
+
+WORKDIR /app/
+CMD ./begin_fuzzing 1200
+
+
+
+
+
+
+
+
+
 
 # WORKDIR /app/leakage_test/postgres-cve-2021-3393
 # RUN chown -R postgres /app
