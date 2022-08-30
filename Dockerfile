@@ -67,7 +67,9 @@ RUN apt-get update && \
                        perl \
                        readline-common \
                        libreadline-dev \
-                       zlib1g-dev
+                       zlib1g-dev \
+                       zip \ 
+                       unzip
 
 
 # RUN mkdir /usr/local/pgsql && \
@@ -86,9 +88,8 @@ WORKDIR /app/
 RUN wget https://www.antlr.org/download/antlr-4.8-complete.jar && \
     cp -f antlr-4.8-complete.jar /usr/local/lib
 
-RUN pushd /app/AFL_info_leakage/custom_mutators/Grammar-Mutator && \
-    make GRAMMAR_FILE=grammars/sql_grammar.json && \
-    popd
+WORKDIR /app/AFL_info_leakage/custom_mutators/Grammar-Mutator
+RUN make GRAMMAR_FILE=grammars/sql_grammar.json
 
 COPY ./leakage_test /app/leakage_test
 
@@ -122,9 +123,13 @@ RUN ./build.sh
 WORKDIR /app/leakage_test/IFSpec_reviewers/
 RUN ./build.sh
 
+WORKDIR /app/leakage_test/kernel_driver_leak/
+RUN ./build.sh
+
+COPY ./fuzz_all_subjects.sh /app/
 
 WORKDIR /app/
-CMD ./begin_fuzzing 1200
+CMD ./fuzz_all_subjects.sh 43200
 
 
 
