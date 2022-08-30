@@ -8,6 +8,11 @@ extern "C" {
   #include "decode_inputs.h"
 }
 
+#ifdef VANILLA_AFL
+    dfsan_label public_label = 1;
+    dfsan_label secret_label = 2;
+#endif
+
 class ErrorLog {
 public:
     void logError(std::string message) {
@@ -108,7 +113,14 @@ int main(void) {
 
     uint8_t *public_in, *secret_in;
     uint32_t public_len, secret_len;
+#ifdef VANILLA_AFL
+    public_in = Data;
+    public_len = length < 8 ? length : 8;
+    secret_in = Data + public_len;
+    secret_len = length - public_len;
+#else
     find_public_and_secret_inputs(Data, length, &public_in, &public_len, &secret_in, &secret_len);
+#endif
 
     for (int i = 0; i < (secret_len < 8 ? secret_len : 8); i++) {
         converter.bytes[i] = secret_in[i];
@@ -119,6 +131,11 @@ int main(void) {
         converter.bytes[i] = public_in[i];
     }
     double transfer = converter.floatVal;
+
+#ifdef VANILLA_AFL
+    dfsan_set_label(public_label, &transfer, sizeof(transfer));
+    dfsan_set_label(secret_label, &deposit, sizeof(deposit));
+#endif
 
     Account account = Account();
     account.deposit(deposit);

@@ -3,15 +3,13 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <stdint.h>
-extern "C" {
 #include "json.h"
 #include "base64.h"
 #include "atalk.h"
 #include "decode_inputs.h"
 #include "memory.h"
-}
 
-int atalk_getname(atptr sock, atptr &uaddr, int peer) {
+int atalk_getname(atptr sock, atptr uaddr, int peer) {
 /*
     atptr sock:  low input
     int peer: low input
@@ -41,7 +39,7 @@ int atalk_getname(atptr sock, atptr &uaddr, int peer) {
 
   sat.sk_state = sock->sk_state;
 	memcpy(uaddr, &sat, sizeof(sat));
-	err = sizeof(atalk_sock);
+	err = sizeof(struct atalk_sock);
 
 out:
 	return err;
@@ -57,6 +55,12 @@ int main(int argc, char *argv[])
     exit(1);
   }
 
+#ifdef VANILLA_AFL
+  if (length < sizeof(struct atalk_sock)) {
+    return 1;
+  }
+  atptr sock = (atptr)Data;
+#else
   uint8_t *public_in, *secret_in;
   uint32_t public_len, secret_len;
   find_public_and_secret_inputs(Data, length, &public_in, &public_len, &secret_in, &secret_len);
@@ -71,23 +75,16 @@ int main(int argc, char *argv[])
       seed |= secret_in[i] << 8 * i;
   }
 
-//  short pos;
-//  uintptr_t stack_size = (uintptr_t)&pos - (uintptr_t)get_min_stack_bottom();
-//
-//  printf("stack: ");
-//  for (int i = 0; i < stack_size; i++) {
-//    if (i % 64 == 0)
-//      printf("\n");
-//    printf("%02hhx", *((char *)&pos - i)); 
-//  }
-//  return 0;
-
   atptr sock = (atptr)public_in;
+#endif
+
   atptr uaddr = (atptr)calloc(1, sizeof(struct atalk_sock));
   int peer = *(int *)(Data + sizeof(struct atalk_sock)) % 2;
 
+#ifndef VANILLA_AFL
   SEED_MEMORY(seed);
   fill_stack();
+#endif
 
   int res = atalk_getname(sock, uaddr, peer);
 

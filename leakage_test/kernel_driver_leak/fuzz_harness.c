@@ -130,6 +130,15 @@ static int sr9700_rx_fixup(struct usbnet *dev, struct sk_buff *skb)
 }
 
 int LLVMFuzzerTestOneInput(const uint8_t *Data, size_t Size) {
+#ifdef VANILLA_AFL
+  if (Size < sizeof(struct sk_buff))
+    return 1;
+
+  struct sk_buff *skb = (struct sk_buff *)Data;
+  skb->len = Size - sizeof(struct sk_buff);
+  skb->data = Data + sizeof(struct sk_buff);
+  struct usbnet dev;
+#else
   uint8_t *public_in, *secret_in;
   uint32_t public_len, secret_len;
   find_public_and_secret_inputs((const char *)Data, Size, &public_in, &public_len, &secret_in, &secret_len);
@@ -152,6 +161,7 @@ int LLVMFuzzerTestOneInput(const uint8_t *Data, size_t Size) {
 
   SEED_MEMORY(seed);
   fill_stack();
+#endif
 
   sr9700_rx_fixup(&dev, skb);
 

@@ -81,7 +81,11 @@ COPY ./Dockerfile /app/
 
 COPY ./AFL_info_leakage /app/AFL_info_leakage
 WORKDIR /app/AFL_info_leakage
-RUN ls && make clean && make && make install
+RUN make clean && make
+
+COPY ./AFL_vanilla /app/AFL_vanilla
+WORKDIR /app/AFL_vanilla
+RUN make clean && make
 
 WORKDIR /app/
 
@@ -92,6 +96,14 @@ WORKDIR /app/AFL_info_leakage/custom_mutators/Grammar-Mutator
 RUN make GRAMMAR_FILE=grammars/sql_grammar.json
 
 COPY ./leakage_test /app/leakage_test
+
+ENV VANILLA=1
+
+RUN if [[ -z "${VANILLA}" ]]; then \
+      cd /app/AFL_info_leakage; make install; \
+    else \
+      cd /app/AFL_vanilla; make install; \
+    fi
 
 WORKDIR /app/leakage_test/NetworkManager_CVE-2011-1943
 RUN ./build.sh
@@ -131,31 +143,3 @@ COPY ./fuzz_all_subjects.sh /app/
 WORKDIR /app/
 CMD ./fuzz_all_subjects.sh 43200
 
-
-
-
-
-
-
-
-
-
-# WORKDIR /app/leakage_test/postgres-cve-2021-3393
-# RUN chown -R postgres /app
-# 
-# RUN CC=/app/AFL_info_leakage/afl-clang-fast CXX=/app/AFL_info_leakage/afl-clang-fast++ ./configure && make && make install
-# 
-# USER postgres
-# 
-# # RUN echo "PATH=$PATH:/usr/local/pgsql/bin/" >> ~/.bash_profile && \
-# #  echo "LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/pgsql/lib" >> ~/.bash_profile && \
-# WORKDIR /app/leakage_test/postgres-cve-2021-3393
-# RUN pwd; AFL_USE_ASAN=1 /app/AFL_info_leakage/afl-clang-fast postgres_leak.c ../json.c ../base64.c ../memory.c ../decode_inputs.c -I../ -I/usr/local/pgsql/include -L/usr/local/pgsql/lib -lpq -lm -Wall -o leaks
-# 
-# ENV PATH=$PATH:/usr/local/pgsql/bin/
-# ENV LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/pgsql/lib
-# 
-# CMD (initdb -D /usr/local/pgsql/data && \
-#  (postgres -D /usr/local/pgsql/data > logfile 2>&1 &) && \
-#  /app/AFL_info_leakage/afl-fuzz -i FUZZ_IN/ -o FUZZ_OUT/ -x /app/AFL_info_leakage/dictionaries/sql.dict -- ./leaks > fuzzing.log); \
-#  tail -f /dev/null

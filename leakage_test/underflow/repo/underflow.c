@@ -40,9 +40,19 @@ int main(void) {
   uint8_t *public_in, *secret_in;
   uint32_t public_len, secret_len;
 
+#ifdef VANILLA_AFL
+  if (length != sizeof(ppos) + sizeof(h)) {
+    return 1;
+  }
+  public_in = data;
+  public_len = sizeof(ppos);
+  secret_in = data + public_len;
+  secret_len = sizeof(h);
+#else
   find_public_and_secret_inputs((const char *)data, length,
                                 &public_in, &public_len,
                                 &secret_in, &secret_len);
+#endif
   
   if (public_len != sizeof(ppos)) {
     printf("expected public_len == %lu, got %u\n", sizeof(ppos), public_len);

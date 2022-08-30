@@ -81,6 +81,19 @@ int main(void) {
   while(__AFL_LOOP(1000)) {
     int len = __AFL_FUZZ_TESTCASE_LEN;
 
+#ifdef VANILLA_AFL
+    oid target;
+    if (len < 4) continue;
+    size_t size = data[0] << 24 | data[1] << 16 | data[2] << 8 | data[3];
+
+    if (!der_get_oid(data, len, &target, &size)) {
+      for (int i = 0; i < target.length; i++) {
+        printf("%d: %u\n", i, target.components[i]);
+      }
+
+      free_oid(&target);
+    }
+#else
     uint8_t *public_in, *secret_in;
     uint32_t public_len, secret_len;
 
@@ -94,7 +107,8 @@ int main(void) {
     }
 
     oid target;
-    size_t size;
+    if (public_len < 4) goto cleanup;
+    size_t size = data[0] << 24 | data[1] << 16 | data[2] << 8 | data[3];
 
     SEED_MEMORY(seed);
     fill_stack();
@@ -107,8 +121,10 @@ int main(void) {
       free_oid(&target);
     }
 
+cleanup:
     free(public_in);
     free(secret_in);
+#endif
   }
 }
 
