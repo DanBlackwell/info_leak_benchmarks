@@ -1,6 +1,5 @@
-#include <stdlib.h>
-#include <stdint.h>
-#include "string.h"
+#ifndef MEMORY_INFO_LEAKAGE_H
+#define MEMORY_INFO_LEAKAGE_H
 
 #define SEED_MEMORY(seed) srand(seed);
 
@@ -12,3 +11,5 @@ void fill_stack(void);
 void *my_malloc(size_t);
 
 #define malloc(bytes) my_malloc(bytes)
+
+#endif

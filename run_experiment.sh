@@ -8,7 +8,7 @@ fi
 SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 cd $SCRIPT_DIR
 
-#VANILLA_AFL=1
+VANILLA_AFL=1
 
 if [[ -z "${VANILLA_AFL}" ]]; then
   echo "Building AFL_info_leakage experiment"
@@ -25,12 +25,12 @@ else
   IMAGE=leaks
 fi
 
-docker build -t $IMAGE .
+docker build --build-arg VANILLA=1 -t $IMAGE .
 NAME="leaks_exp"
 if [[ -z "${VANILLA_AFL}" ]]; then
   docker container run --name $NAME $IMAGE
 else
-  docker container run --build-arg VANILLA=1 --name $NAME $IMAGE
+  docker container run --name $NAME $IMAGE
 fi
 docker cp $NAME:/app/leakage_test $OUTPUT_DIR/ && docker rm $NAME
 
