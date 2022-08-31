@@ -66,6 +66,10 @@ int main(int argc, char *argv[])
   uint8_t *public_in, *secret_in;
   uint32_t public_len, secret_len;
   find_public_and_secret_inputs(Data, length, &public_in, &public_len, &secret_in, &secret_len);
+  if (!public_in || !secret_in) {
+    printf("Failed to parse public / secret inputs JSON (expected \'{\"PUBLIC\": \"base64_input\", \"SECRET\": \"base64_input\"}\')\n");
+    return 1;
+  }
 
   if (public_len != sizeof(struct atalk_sock) + 4) {
     printf("Expected public len %lu, was %u bytes\n", sizeof(struct atalk_sock) + 4, public_len);

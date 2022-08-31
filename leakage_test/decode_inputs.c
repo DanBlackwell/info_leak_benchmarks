@@ -20,6 +20,13 @@ void find_public_and_secret_inputs(const char *testcase_buf, uint32_t testcase_l
   json_char *json = (json_char *)testcase_buf;
   json_value *value = json_parse(json, testcase_len);
 
+  if (!value) {
+    *secret_input = *public_input = NULL;
+    *public_len = 0;
+    *secret_len = 0;
+    return;
+  }
+
   switch (value->type) {
     case json_object: {
       uint32_t len = value->u.object.length;

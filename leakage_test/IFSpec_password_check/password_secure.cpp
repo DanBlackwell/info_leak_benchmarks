@@ -56,7 +56,10 @@ int main(void) {
   uint8_t *public_in, *secret_in;
   uint32_t public_len, secret_len;
   find_public_and_secret_inputs(Data, length, &public_in, &public_len, &secret_in, &secret_len);
-
+  if (!public_in || !secret_in) {
+    printf("Failed to parse public / secret inputs JSON (expected \'{\"PUBLIC\": \"base64_input\", \"SECRET\": \"base64_input\"}\')\n");
+    return 1;
+  }
 
   int passwordAttempts = 0;
   for (int i = 0; i < (secret_len < 4 ? secret_len : 4); i++) {

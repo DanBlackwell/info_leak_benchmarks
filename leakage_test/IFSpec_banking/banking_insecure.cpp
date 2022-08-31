@@ -120,6 +120,10 @@ int main(void) {
     secret_len = length - public_len;
 #else
     find_public_and_secret_inputs(Data, length, &public_in, &public_len, &secret_in, &secret_len);
+    if (!public_in || !secret_in) {
+        printf("Failed to parse public / secret inputs JSON (expected \'{\"PUBLIC\": \"base64_input\", \"SECRET\": \"base64_input\"}\')\n");
+        return 1;
+    }
 #endif
 
     for (int i = 0; i < (secret_len < 8 ? secret_len : 8); i++) {
