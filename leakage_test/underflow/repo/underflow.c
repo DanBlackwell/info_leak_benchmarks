@@ -2,7 +2,9 @@
 #include <stdlib.h>
 #include <stdint.h>
 #include <unistd.h>
-#include "decode_inputs.h"
+#ifndef VANILLA_AFL
+  #include "decode_inputs.h"
+endif
 
 int underflow(int h, int64_t ppos)
 {

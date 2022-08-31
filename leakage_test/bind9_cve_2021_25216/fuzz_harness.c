@@ -2,8 +2,10 @@
 #include <stdio.h>
 #include <errno.h>
 #include <stdint.h>
-#include "decode_inputs.h"
-#include "memory.h"
+#ifndef VANILLA_AFL
+  #include "decode_inputs.h"
+  #include "memory.h"
+#endif
 
 typedef struct oid {
     size_t length;

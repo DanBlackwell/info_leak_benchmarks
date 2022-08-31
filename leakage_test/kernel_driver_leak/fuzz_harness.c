@@ -3,8 +3,10 @@
 #include <stdio.h>
 #include <assert.h>
 #include <string.h>
-#include "decode_inputs.h"
-#include "memory.h"
+#ifndef VANILLA_AFL
+  #include "decode_inputs.h"
+  #include "memory.h"
+#endif
 
 #define	SR_RX_OVERHEAD		7	/* 3bytes header + 4crc tail */
 #define ETH_FRAME_LEN	1514		/* Max. octets in frame sans FCS */

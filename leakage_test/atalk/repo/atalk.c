@@ -6,8 +6,10 @@
 #include "json.h"
 #include "base64.h"
 #include "atalk.h"
-#include "decode_inputs.h"
-#include "memory.h"
+#ifndef VANILLA_AFL
+  #include "decode_inputs.h"
+  #include "memory.h"
+#endif
 
 int atalk_getname(atptr sock, atptr uaddr, int peer) {
 /*
