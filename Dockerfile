@@ -1,6 +1,7 @@
-# FROM ubuntu:20.04
-
 FROM ubuntu:20.04 AS aflplusplus
+
+ARG VANILLA=""
+
 #FROM ubuntu:22.04 AS aflplusplus
 LABEL "maintainer"="afl++ team <afl@aflplus.plus>"
 LABEL "about"="AFLplusplus docker image"
@@ -97,7 +98,7 @@ RUN make GRAMMAR_FILE=grammars/sql_grammar.json
 
 COPY ./leakage_test /app/leakage_test
 
-ENV VANILLA=1
+#ENV VANILLA=1
 
 RUN if [[ -z "${VANILLA}" ]]; then \
       cd /app/AFL_info_leakage; make install; \
@@ -141,5 +142,5 @@ RUN ./build.sh
 COPY ./fuzz_all_subjects.sh /app/
 
 WORKDIR /app/
-CMD ./fuzz_all_subjects.sh 43200
+CMD ./fuzz_all_subjects.sh 86400
 

@@ -8,13 +8,30 @@ fi
 SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 cd $SCRIPT_DIR
 
-OUTPUT_DIR="experimental_results_vanilla/$(hostname)_$(date -d "today" +"%Y_%m_%d_%H%M")"
+#VANILLA_AFL=1
+
+if [[ -z "${VANILLA_AFL}" ]]; then
+  echo "Building AFL_info_leakage experiment"
+  OUTPUT_DIR="experimental_results/$(hostname)_$(date -d "today" +"%Y_%m_%d_%H%M")"
+else
+  echo "Building VANILLA AFL experiment"
+  OUTPUT_DIR="experimental_results_vanilla/$(hostname)_$(date -d "today" +"%Y_%m_%d_%H%M")"
+fi
 mkdir -p $OUTPUT_DIR
 
-IMAGE=leaks_vanilla
+if [[ -z "${VANILLA_AFL}" ]]; then
+  IMAGE=leaks_vanilla
+else
+  IMAGE=leaks
+fi
+
 docker build -t $IMAGE .
-NAME="leaks_exp_vanilla"
-docker container run --name $NAME $IMAGE
+NAME="leaks_exp"
+if [[ -z "${VANILLA_AFL}" ]]; then
+  docker container run --name $NAME $IMAGE
+else
+  docker container run --build-arg VANILLA=1 --name $NAME $IMAGE
+fi
 docker cp $NAME:/app/leakage_test $OUTPUT_DIR/ && docker rm $NAME
 
 echo "COMPLETED EXPERIMENT - COPIED RESULTS INTO $OUTPUT_DIR"
