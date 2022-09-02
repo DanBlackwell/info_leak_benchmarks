@@ -4,7 +4,7 @@
 #include <unistd.h>
 #ifndef VANILLA_AFL
   #include "decode_inputs.h"
-endif
+#endif
 
 int underflow(int h, int64_t ppos)
 {
