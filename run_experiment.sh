@@ -22,7 +22,7 @@ mkdir -p $OUTPUT_DIR
 NAME="leaks_exp"
 if [[ -z "${VANILLA_AFL}" ]]; then
   IMAGE=leaks
-  docker build --build-arg -t $IMAGE .
+  docker build -t $IMAGE .
 else
   IMAGE=leaks_vanilla
   docker build --build-arg VANILLA=1 -t $IMAGE .
