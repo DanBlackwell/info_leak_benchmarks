@@ -28,10 +28,11 @@ fi
 docker build --build-arg VANILLA=1 -t $IMAGE .
 NAME="leaks_exp"
 if [[ -z "${VANILLA_AFL}" ]]; then
-  docker container run --name $NAME $IMAGE
+  docker build --build-arg -t $IMAGE .
 else
-  docker container run --name $NAME $IMAGE
+  docker build --build-arg VANILLA=1 -t $IMAGE .
 fi
+docker container run --name $NAME $IMAGE
 docker cp $NAME:/app/leakage_test $OUTPUT_DIR/ && docker rm $NAME
 
 echo "COMPLETED EXPERIMENT - COPIED RESULTS INTO $OUTPUT_DIR"

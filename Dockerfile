@@ -98,11 +98,11 @@ RUN make GRAMMAR_FILE=grammars/sql_grammar.json
 
 COPY ./leakage_test /app/leakage_test
 
-#ENV VANILLA=1
-
 RUN if [[ -z "${VANILLA}" ]]; then \
+      echo "INSTALLING AFL_INFO_LEAKAGE"
       cd /app/AFL_info_leakage; make install; \
     else \
+      echo "INSTALLING AFL_VANILLA"
       cd /app/AFL_vanilla; make install; \
     fi
 
