@@ -10,6 +10,8 @@ ARG DEBIAN_FRONTEND=noninteractive
 
 env NO_ARCH_OPT 1
 
+SHELL ["/bin/bash", "-c"]
+
 RUN apt-get update && \
     apt-get -y install --no-install-suggests --no-install-recommends \
     automake \
@@ -82,11 +84,11 @@ COPY ./Dockerfile /app/
 
 COPY ./AFL_info_leakage /app/AFL_info_leakage
 WORKDIR /app/AFL_info_leakage
-RUN make clean && make
+RUN make
 
 COPY ./AFL_vanilla /app/AFL_vanilla
 WORKDIR /app/AFL_vanilla
-RUN make clean && make
+RUN make
 
 WORKDIR /app/
 
