@@ -1,7 +1,7 @@
 #!/bin/bash
 
 CFLAGS=""
-if ! [[ -z VANILLA ]]; then
+if ! [[ -z "${VANILLA}" ]]; then
   CFLAGS="-D VANILLA_AFL"
   export AFL_USE_MSAN=1
 fi
