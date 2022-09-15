@@ -72,16 +72,7 @@ der_get_oid(const unsigned char *p, size_t len, oid *data, size_t *size) {
 	return (0);
 }
 
-__AFL_FUZZ_INIT();
-
-int main(void) {
-
-  __AFL_INIT();
-
-  char *data = __AFL_FUZZ_TESTCASE_BUF;
-
-  while(__AFL_LOOP(1000)) {
-    int len = __AFL_FUZZ_TESTCASE_LEN;
+int LLVMFuzzerTestOneInput(const uint8_t *data, uint32_t len) {
 
 #ifdef VANILLA_AFL
     oid target;
@@ -131,6 +122,5 @@ cleanup:
     free(public_in);
     free(secret_in);
 #endif
-  }
 }
 

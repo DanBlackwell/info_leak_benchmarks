@@ -47,15 +47,7 @@ out:
 	return err;
 }
 
-int main(int argc, char *argv[])
-{
-
-  char *Data = (char *)malloc(1024*1024+1);
-  int length = read(STDIN_FILENO, Data, 1024*1024+1);
-  if (length == -1 || length == 1024*1024+1) {
-    printf("Error! too long\n");
-    exit(1);
-  }
+int LLVMFuzzerTestOneInput(const uint8_t *Data, uint32_t length) {
 
 #ifdef VANILLA_AFL
   if (length < sizeof(struct atalk_sock)) {

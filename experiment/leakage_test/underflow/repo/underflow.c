@@ -27,17 +27,10 @@ void print_boring() {
   printf("0\n");
 }
 
-int main(void) {
+
+int LLVMFuzzerTestOneInput(const uint8_t *data, uint32_t length) {
   int h;
   int64_t ppos;
-
-  uint8_t *data = malloc(65536);
-  int length = read(STDIN_FILENO, data, 65536);
-	
-  if (length >= 65536) {
-    printf("Input longer than 65536!\n");
-    return 1;
-  }
 
   uint8_t *public_in, *secret_in;
   uint32_t public_len, secret_len;
