@@ -1,6 +1,6 @@
 [submodule "AFL_info_leakage"]
-	path = AFL_info_leakage
+	path = experiment/AFL_info_leakage
 	url = git@github.com:DanBlackwell/AFLplusplus_hashfuzz.git
 [submodule "AFL_vanilla"]
-	path = AFL_vanilla
+	path = experiment/AFL_vanilla
 	url = https://github.com/AFLplusplus/AFLplusplus
