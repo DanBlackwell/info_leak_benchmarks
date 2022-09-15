@@ -143,6 +143,7 @@ RUN ./build.sh
 
 COPY ./fuzz_all_subjects.sh /app/
 
+ENV VANILLA ${VANILLA}
+
 WORKDIR /app/
 CMD ./fuzz_all_subjects.sh 86400
-
