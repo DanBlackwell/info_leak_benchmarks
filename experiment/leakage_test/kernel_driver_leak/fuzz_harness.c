@@ -1,4 +1,4 @@
-nclude "skbuff.h"
+#include "skbuff.h"
 #include "usbnet.h"
 #include <stdio.h>
 #include <assert.h>
@@ -120,10 +120,11 @@ static int sr9700_rx_fixup(struct usbnet *dev, struct sk_buff *skb)
 		sr_skb->data = skb->data + 3;
 		skb_set_tail_pointer(sr_skb, len);
 		sr_skb->truesize = len + sizeof(struct sk_buff);
-    for (int i = 0; i < sr_skb->len; i++) {
-      printf("%02X", sr_skb->data[i]);
-    }
-    printf("\n");
+
+		for (int i = 0; i < sizeof(sr_skb); i++) {
+		  printf("%02X", ((uint8_t *)sr_skb)[i]);
+		}
+		printf("\n");
 //		usbnet_skb_return(dev, sr_skb);
 
 		skb_pull(skb, len + SR_RX_OVERHEAD);
