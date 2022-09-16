@@ -79,7 +79,7 @@ int LLVMFuzzerTestOneInput(const uint8_t *data, uint32_t len) {
     if (len < 4) continue;
     size_t size = data[0] << 24 | data[1] << 16 | data[2] << 8 | data[3];
 
-    if (!der_get_oid(data, len, &target, &size)) {
+    if (!der_get_oid(data + 4, len, &target, &size)) {
       for (int i = 0; i < target.length; i++) {
         printf("%d: %u\n", i, target.components[i]);
       }
@@ -105,12 +105,12 @@ int LLVMFuzzerTestOneInput(const uint8_t *data, uint32_t len) {
 
     oid target;
     if (public_len < 4) goto cleanup;
-    size_t size = data[0] << 24 | data[1] << 16 | data[2] << 8 | data[3];
+    size_t size = public_in[0] << 24 | public_in[1] << 16 | public_in[2] << 8 | public_in[3];
 
     SEED_MEMORY(seed);
     fill_stack();
 
-    if (!der_get_oid(public_in, public_len, &target, &size)) {
+    if (!der_get_oid(public_in + 4, public_len - 4, &target, &size)) {
       for (int i = 0; i < target.length; i++) {
         printf("%d: %u\n", i, target.components[i]);
       }
