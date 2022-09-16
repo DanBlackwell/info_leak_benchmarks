@@ -97,7 +97,6 @@ static int sr9700_rx_fixup(struct usbnet *dev, struct sk_buff *skb)
 
 		/* ignore the CRC length */
 		len = (skb->data[1] | (skb->data[2] << 8)) - 4;
-		printf("SucCESS, len: %d\n", len);
 
 		if (len > ETH_FRAME_LEN)
 			return 0;
