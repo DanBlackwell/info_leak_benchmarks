@@ -1,4 +1,4 @@
-#include "skbuff.h"
+nclude "skbuff.h"
 #include "usbnet.h"
 #include <stdio.h>
 #include <assert.h>
@@ -97,6 +97,7 @@ static int sr9700_rx_fixup(struct usbnet *dev, struct sk_buff *skb)
 
 		/* ignore the CRC length */
 		len = (skb->data[1] | (skb->data[2] << 8)) - 4;
+		printf("SucCESS, len: %d\n", len);
 
 		if (len > ETH_FRAME_LEN)
 			return 0;
@@ -119,7 +120,7 @@ static int sr9700_rx_fixup(struct usbnet *dev, struct sk_buff *skb)
 		sr_skb->data = skb->data + 3;
 		skb_set_tail_pointer(sr_skb, len);
 		sr_skb->truesize = len + sizeof(struct sk_buff);
-    for (int i = 0; i < len; i++) {
+    for (int i = 0; i < sr_skb->len; i++) {
       printf("%02X", sr_skb->data[i]);
     }
     printf("\n");
@@ -149,27 +150,36 @@ int LLVMFuzzerTestOneInput(const uint8_t *Data, size_t Size) {
     return 1;
   }
 
-  if (public_len < sizeof(struct sk_buff)) {
-    printf("Expected public len %lu, was %u bytes\n", sizeof(struct sk_buff), public_len);
-    return 1;
-  }
-  printf("Input validated\n");
-
   uint32_t seed = 0;
   for (uint32_t i = 0; i < (secret_len < 4 ? secret_len : 4); i++) {
       seed |= secret_in[i] << 8 * i;
   }
 
-  struct sk_buff *skb = (struct sk_buff *)public_in;
-  skb->len = public_len - sizeof(struct sk_buff);
-  skb->data = public_in + sizeof(struct sk_buff);
+  int pos = 0;
+
+  struct sk_buff *skb;
   struct usbnet dev;
 
   SEED_MEMORY(seed);
   fill_stack();
 #endif
+  size_t requiredSize = sizeof(struct sk_buff) + 50;
+  if (public_len < requiredSize) {
+    printf("Expected public len %lu, was %u bytes\n", requiredSize, public_len);
+    return 1;
+  }
 
-  sr9700_rx_fixup(&dev, skb);
+  while (public_len - pos > requiredSize) {
+    skb = (struct sk_buff *)public_in + pos;
+    pos += sizeof(struct sk_buff);
+    skb->len = public_in[pos] % 50;
+    pos += 1;
+    skb->data = public_in + pos;
+    pos += skb->len;
+    dev = (struct usbnet){0};
+  
+    sr9700_rx_fixup(&dev, skb);
+  }
 
   return 0;
 }
