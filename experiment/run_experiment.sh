@@ -27,7 +27,7 @@ else
   IMAGE=leaks_vanilla
   docker build --build-arg VANILLA=1 -t $IMAGE .
 fi
-docker container run --name $NAME $IMAGE
+docker container run --ulimit core=0 --name $NAME $IMAGE
 docker cp $NAME:/app/leakage_test $OUTPUT_DIR/ && docker rm $NAME
 
 chown -R dblackwell $OUTPUT_DIR

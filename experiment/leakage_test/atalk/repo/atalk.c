@@ -81,7 +81,7 @@ int LLVMFuzzerTestOneInput(const uint8_t *Data, uint32_t length) {
 
 #ifndef VANILLA_AFL
   SEED_MEMORY(seed);
-  fill_stack();
+  FILL_STACK();
 #endif
 
   int res = atalk_getname(sock, uaddr, peer);
