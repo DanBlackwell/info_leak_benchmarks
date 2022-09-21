@@ -5,6 +5,7 @@ extern "C" {
   #include <unistd.h>
   #include <stdint.h>
   #include <stdlib.h>
+  #include <string.h>
   #include "decode_inputs.h"
 }
 
@@ -16,7 +17,7 @@ extern "C" {
 class ErrorLog {
 public:
     void logError(std::string message) {
-        std::cerr << message << std::endl;
+        std::cout << message << std::endl;
     }
 };
 
@@ -130,7 +131,9 @@ int main(void) {
         converter.bytes[i] = secret_in[i];
     }
     double deposit = converter.floatVal;
+    deposit = (deposit != deposit || deposit < 0.01) ? 0.01 : deposit;
 
+    memset(converter.bytes, 0, sizeof(converter.bytes));
     for (int i = 0; i < (public_len < 8 ? public_len : 8); i++) {
         converter.bytes[i] = public_in[i];
     }
