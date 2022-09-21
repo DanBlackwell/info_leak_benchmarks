@@ -45,20 +45,16 @@ public:
 };
 
 
-int main(void) {
-  char *Data = (char *)malloc(1024*1024+1);
-  int length = read(STDIN_FILENO, Data, 1024*1024+1);
-  if (length == -1 || length == 1024*1024+1) {
-    printf("Error! too long\n");
-    exit(1);
-  }
+extern "C" int LLVMFuzzerTestOneInput(const uint8_t *Data, uint32_t length) {
   
   uint8_t *public_in, *secret_in;
   uint32_t public_len, secret_len;
-  find_public_and_secret_inputs(Data, length, &public_in, &public_len, &secret_in, &secret_len);
+  find_public_and_secret_inputs((const char *)Data, length, &public_in, &public_len, &secret_in, &secret_len);
   if (!public_in || !secret_in) {
-    printf("Failed to parse public / secret inputs JSON (expected \'{\"PUBLIC\": \"base64_input\", \"SECRET\": \"base64_input\"}\')\n");
-    return 1;
+      printf("Failed to parse public / secret inputs JSON (expected \'{\"PUBLIC\": \"base64_input\", \"SECRET\": \"base64_input\"}\')\n");
+      free(public_in);
+      free(secret_in);
+      return 1;
   }
 
   int passwordAttempts = 0;
@@ -88,5 +84,9 @@ int main(void) {
   } while ((input = strtok_r(NULL, "\n", &temp)) != NULL);
 
   std::cout << "Run completed, run again" << std::endl;
+
+  free(public_in);
+  free(secret_in);
+
 	return 0;
 }
