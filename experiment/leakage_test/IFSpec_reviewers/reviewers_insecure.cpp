@@ -53,25 +53,25 @@ private:
 	std::vector<Review> reviews;
 };
 
-int main(void) {
+extern "C" int LLVMFuzzerTestOneInput(const uint8_t *Data, uint32_t length) {
 	ReviewProcess rp = ReviewProcess();
 
-  char *Data = (char *)malloc(1024*1024+1);
-  int length = read(STDIN_FILENO, Data, 1024*1024+1);
-  if (length == -1 || length == 1024*1024+1) {
-    printf("Error! too long\n");
-    return 1;
-  }
-  
   uint8_t *public_in, *secret_in;
   uint32_t public_len, secret_len;
-  find_public_and_secret_inputs(Data, length, &public_in, &public_len, &secret_in, &secret_len);
+  find_public_and_secret_inputs((const char *)Data, length, &public_in, &public_len, &secret_in, &secret_len);
   if (!public_in || !secret_in) {
-    printf("Failed to parse public / secret inputs JSON (expected \'{\"PUBLIC\": \"base64_input\", \"SECRET\": \"base64_input\"}\')\n");
-    return 1;
+      printf("Failed to parse public / secret inputs JSON (expected \'{\"PUBLIC\": \"base64_input\", \"SECRET\": \"base64_input\"}\')\n");
+      free(public_in);
+      free(secret_in);
+      return 1;
   }
 
-  if (public_len < 2) { printf("public input needs at least 2 bytes\n"); return 1; }
+  if (public_len < 2) { 
+    printf("public input needs at least 2 bytes\n"); 
+    free(public_in);
+    free(secret_in);
+    return 1; 
+  }
 
   int secretPos = 0, publicPos = 0;
   int numReviewers = public_in[0] % 7 + 1;
@@ -119,4 +119,9 @@ int main(void) {
  }
 
 	rp.sendNotifications();
+
+  free(public_in);
+  free(secret_in);
+
+  return 0;
 }
