@@ -13,9 +13,9 @@ void *my_malloc(size_t);
 #define FILL_STACK() { \
   uint64_t *__stack_bottom = (uint64_t *)get_cur_stack_bottom(); \
   uint64_t repeatedVal = (uint64_t)rand() << 48 | (uint64_t)rand() << 32 | (uint64_t)rand() << 16 | (uint64_t)rand(); \
-  uint64_t *stack_loc; \
+  volatile uint64_t *stack_loc; stack_loc = (void *)(&stack_loc - 1); \
  \
-  for (stack_loc = &repeatedVal - 1; stack_loc > __stack_bottom; stack_loc--) { \
+  for (; stack_loc > __stack_bottom; stack_loc--) { \
     *stack_loc = repeatedVal; \
   } \
  \

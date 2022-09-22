@@ -11,6 +11,7 @@
   #include "memory.h"
 #endif
 
+__attribute__((optnone))
 int atalk_getname(atptr sock, atptr uaddr, int peer) {
 /*
     atptr sock:  low input
