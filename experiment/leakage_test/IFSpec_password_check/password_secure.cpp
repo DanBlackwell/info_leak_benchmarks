@@ -92,13 +92,15 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t *Data, uint32_t length) {
 
   char *input, *temp;
   input = strtok_r(str, "\n", &temp);
-  do {
+  while (input) {
     std::cout << "Enter password:" << std::endl;
 
     exit |= strcmp(input, exitKeyword) == 0;
     exit |= input == exitKeyword;
+    printf("str: %p, input: %p, input: %s\n", str, input, input);
     pm.tryLogin(input);
-  } while ((input = strtok_r(NULL, "\n", &temp)) != NULL);
+    input = strtok_r(NULL, "\n", &temp);
+  }
 
   std::cout << "Run completed, run again" << std::endl;
 
