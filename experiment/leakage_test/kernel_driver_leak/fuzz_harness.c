@@ -165,7 +165,7 @@ int LLVMFuzzerTestOneInput(const uint8_t *Data, size_t Size) {
   }
 
   while (public_len > pos && public_len - pos > requiredSize) {
-    skb = (struct sk_buff *)public_in + pos;
+    skb = (struct sk_buff *)(public_in + pos);
     pos += sizeof(struct sk_buff);
     skb->len = public_in[pos] % 50;
     pos += 1;
