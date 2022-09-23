@@ -11,6 +11,11 @@ extern "C" {
   #include "decode_inputs.h"
 }
 
+#ifdef DFSAN
+    dfsan_label public_label = 1;
+    dfsan_label secret_label = 2;
+#endif
+
 class Review {
 public:
 	int reviewer_id;
@@ -52,24 +57,40 @@ private:
 };
 
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t *Data, uint32_t length) {
-	ReviewProcess rp = ReviewProcess();
+  ReviewProcess rp = ReviewProcess();
 
   uint8_t *public_in, *secret_in;
   uint32_t public_len, secret_len;
-  find_public_and_secret_inputs((const char *)Data, length, &public_in, &public_len, &secret_in, &secret_len);
-  if (!public_in || !secret_in) {
+#if defined MSAN || defined DFSAN
+    public_in = (uint8_t *)Data;
+    public_len = length < 8 ? length : 8;
+    secret_in = (uint8_t *)Data + public_len;
+    secret_len = length - public_len;
+#else
+    find_public_and_secret_inputs((const char *)Data, length, &public_in, &public_len, &secret_in, &secret_len);
+    if (!public_in || !secret_in) {
       printf("Failed to parse public / secret inputs JSON (expected \'{\"PUBLIC\": \"base64_input\", \"SECRET\": \"base64_input\"}\')\n");
       free(public_in);
       free(secret_in);
       return 1;
-  }
- 
+    }
+#endif
+
   if (public_len < 2) { 
     printf("public input needs at least 2 bytes\n"); 
+#if defined MSAN || defined DFSAN
+    // no need to free anything
+#else
     free(public_in);
     free(secret_in);
+#endif
     return 1; 
   }
+
+#ifdef DFSAN
+    dfsan_set_label(public_label, public_in, public_len);
+    dfsan_set_label(secret_label, secret_in, secret_len + 1);
+#endif
 
   int secretPos = 0, publicPos = 0;
   int numReviewers = public_in[0] % 7 + 1;
@@ -118,9 +139,12 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t *Data, uint32_t length) {
 
   rp.sendNotifications();
 
+#if defined MSAN || defined DFSAN
+    // no need to free anything
+#else
   free(public_in);
   free(secret_in);
+#endif
 
   return 0;
 }
-

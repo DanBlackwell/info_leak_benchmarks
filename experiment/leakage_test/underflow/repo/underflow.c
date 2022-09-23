@@ -29,7 +29,7 @@ void print_boring() {
 
 
 int LLVMFuzzerTestOneInput(const uint8_t *data, uint32_t length) {
-  int h;
+  int h = 0;
   int64_t ppos;
 
   uint8_t *public_in, *secret_in;
@@ -39,9 +39,9 @@ int LLVMFuzzerTestOneInput(const uint8_t *data, uint32_t length) {
   if (length != sizeof(ppos) + sizeof(h)) {
     return 1;
   }
-  public_in = data;
+  public_in = (uint8_t *)data;
   public_len = sizeof(ppos);
-  secret_in = data + public_len;
+  secret_in = (uint8_t *)data + public_len;
   secret_len = sizeof(h);
 #else
   find_public_and_secret_inputs((const char *)data, length,
@@ -58,12 +58,10 @@ int LLVMFuzzerTestOneInput(const uint8_t *data, uint32_t length) {
     return 1;
   }
 
-  if (secret_len != sizeof(h)) {
-    print_boring();
-    return 1;
+  if (secret_len >= sizeof(h)) {
+    h = *(int *)secret_in;
   }
 
-  h = *(int *)secret_in;
   ppos = *(int64_t *)public_in;
 
   printf("%d\n", underflow(h, ppos));

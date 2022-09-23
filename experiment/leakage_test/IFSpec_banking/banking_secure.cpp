@@ -9,7 +9,7 @@ extern "C" {
   #include "decode_inputs.h"
 }
 
-#ifdef VANILLA_AFL
+#ifdef DFSAN
     dfsan_label public_label = 1;
     dfsan_label secret_label = 2;
 #endif
@@ -105,10 +105,10 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t *Data, uint32_t length) {
 
     uint8_t *public_in, *secret_in;
     uint32_t public_len, secret_len;
-#ifdef VANILLA_AFL
-    public_in = Data;
+#if defined MSAN || defined DFSAN
+    public_in = (uint8_t *)Data;
     public_len = length < 8 ? length : 8;
-    secret_in = Data + public_len;
+    secret_in = (uint8_t *)Data + public_len;
     secret_len = length - public_len;
 #else
     find_public_and_secret_inputs((const char *)Data, length, &public_in, &public_len, &secret_in, &secret_len);
@@ -132,7 +132,7 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t *Data, uint32_t length) {
     }
     double transfer = converter.floatVal;
 
-#ifdef VANILLA_AFL
+#ifdef DFSAN
     dfsan_set_label(public_label, &transfer, sizeof(transfer));
     dfsan_set_label(secret_label, &deposit, sizeof(deposit));
 #endif
@@ -143,8 +143,12 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t *Data, uint32_t length) {
     Beneficiary beneficiary = Beneficiary();
     owner.payBeneficiary(beneficiary, transfer);
 
+#if defined MSAN || defined DFSAN
+    // no need to free anything
+#else
     free(public_in);
     free(secret_in);
+#endif
 
     return 0;
 }
