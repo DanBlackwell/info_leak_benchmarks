@@ -4,6 +4,33 @@
 #include <string.h>
 #include <sys/resource.h>
 
+extern void *malloc(size_t);
+extern void *__real_malloc(size_t);
+
+uint64_t repeatedVal = 0;
+
+void initRepeatedVal() {
+  repeatedVal = (uint64_t)rand() << 48 | (uint64_t)rand() << 32 | (uint64_t)rand() << 16 | (uint64_t)rand();
+}
+
+void *__wrap_malloc(size_t bytes) {
+  uint64_t *raw = (uint64_t *)__real_malloc(bytes);
+
+  if (!repeatedVal)
+    initRepeatedVal();
+
+  uint64_t reps = bytes / sizeof(repeatedVal);
+  for (size_t i = 0; i < reps; i++) {
+    raw[i] = repeatedVal;
+  }
+  for (size_t i = 0; i < bytes % sizeof(repeatedVal); i++) {
+    ((uint8_t *)(raw + reps))[i] = repeatedVal >> (8 * i) & 0xFF;
+  }
+
+  return (void *)raw;
+}
+
+
 void *get_stack_top() {
 
   FILE *file = fopen("/proc/self/maps", "r");
@@ -47,18 +74,10 @@ void *get_min_stack_bottom() {
   return (char *)min - limit.rlim_cur;
 }
 
-void *my_malloc(size_t bytes) {
-  short *raw = (short *)malloc(bytes);
-  for (size_t i = 0; i < bytes / sizeof(short); i++) {
-    raw[i] = rand();
-  }
-
-  return (void *)raw;
-}
-
 void fill_stack() {
   uint64_t *__stack_bottom = (uint64_t *)get_cur_stack_bottom();
-  uint64_t repeatedVal = (uint64_t)rand() << 48 | (uint64_t)rand() << 32 | (uint64_t)rand() << 16 | (uint64_t)rand();
+  if (!repeatedVal)
+    initRepeatedVal();
   volatile uint64_t *stack_loc; stack_loc = (void *)(&stack_loc - 1);
 
   for (; stack_loc > __stack_bottom; stack_loc--) {
@@ -68,3 +87,4 @@ void fill_stack() {
   stack_loc = (uint64_t *)repeatedVal;
   __stack_bottom = (uint64_t *)repeatedVal;
 }
+

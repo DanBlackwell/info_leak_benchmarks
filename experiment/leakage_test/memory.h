@@ -3,12 +3,12 @@
 
 #define SEED_MEMORY(seed) srand(seed);
 
+void *__wrap_malloc(size_t);
 void *get_stack_top(void);
 void *get_cur_stack_bottom(void);
 void *get_min_stack_bottom(void);
 
 void fill_stack(void);
-void *my_malloc(size_t);
 
 #define FILL_STACK() { \
   uint64_t *__stack_bottom = (uint64_t *)get_cur_stack_bottom(); \
@@ -22,7 +22,5 @@ void *my_malloc(size_t);
   stack_loc = (uint64_t *)repeatedVal; \
   __stack_bottom = (uint64_t *)repeatedVal; \
 }  
-
-#define malloc(bytes) my_malloc(bytes)
 
 #endif

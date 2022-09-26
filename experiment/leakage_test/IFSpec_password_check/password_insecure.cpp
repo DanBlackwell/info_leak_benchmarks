@@ -99,7 +99,6 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t *Data, uint32_t length) {
 
     exit |= strcmp(input, exitKeyword) == 0;
     exit |= input == exitKeyword;
-    printf("str: %p, input: %p, input: %s\n", str, input, input);
     pm.tryLogin(input);
     input = strtok_r(NULL, "\n", &temp);
   }

@@ -4,6 +4,8 @@ CFLAGS=""
 if ! [[ -z "${VANILLA}" ]]; then
   CFLAGS="-D MSAN"
   export AFL_USE_MSAN=1
+else
+  CFLAGS="-Wl,--wrap=malloc"
 fi
 
 gcc -O3 -c ../memory.c -o m.o
