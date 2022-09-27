@@ -27,7 +27,15 @@ else
   IMAGE=leaks_vanilla
   docker build --build-arg VANILLA=1 -t $IMAGE .
 fi
+
+# Disable ASLR for the run
+echo 0 | tee /proc/sys/kernel/randomize_va_space
+
 docker container run --ulimit core=0 --name $NAME $IMAGE
+
+# Reenable ASLR
+echo 2 | tee /proc/sys/kernel/randomize_va_space
+
 docker cp $NAME:/app/leakage_test $OUTPUT_DIR/ && docker rm $NAME
 
 chown -R dblackwell $OUTPUT_DIR
