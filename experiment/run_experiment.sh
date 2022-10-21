@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -e 
+
 if [[ $(id -u) -ne 0 ]]; then 
   echo "Please run as root"
   exit
@@ -8,7 +10,7 @@ fi
 SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 cd $SCRIPT_DIR
 
-# VANILLA_AFL=1
+VANILLA_AFL=1
 
 if [[ -z "${VANILLA_AFL}" ]]; then
   echo "Building AFL_info_leakage experiment"

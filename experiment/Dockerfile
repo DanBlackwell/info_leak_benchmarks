@@ -1,8 +1,10 @@
 FROM ubuntu:20.04 AS aflplusplus
 
 ARG VANILLA=""
+ENV VANILLA=${VANILLA}
 
-#FROM ubuntu:22.04 AS aflplusplus
+# Build and install AFL++ and dependencies
+
 LABEL "maintainer"="afl++ team <afl@aflplus.plus>"
 LABEL "about"="AFLplusplus docker image"
 
@@ -28,6 +30,7 @@ RUN apt-get update && \
     gnuplot-nox \
     gtk-doc-tools autopoint intltool libdbus-glib-1-dev \
     valgrind uuid-dev default-jre python3 zip \
+    binutils libc6-dev \
     && rm -rf /var/lib/apt/lists/*
 
 RUN echo "deb http://apt.llvm.org/focal/ llvm-toolchain-focal-12 main" >> /etc/apt/sources.list && \
@@ -53,6 +56,30 @@ ENV LLVM_CONFIG=llvm-config-12
 ENV AFL_SKIP_CPUFREQ=1
 ENV AFL_TRY_AFFINITY=1
 ENV AFL_I_DONT_CARE_ABOUT_MISSING_CRASHES=1
+
+# install DFSan version of clang and libcxx
+
+# FROM mcopik/clang-dfsan:clang-dfsan-9.0 as clang_base
+# FROM mcopik/clang-dfsan:libcxx-dfsan-9.0 as libcxx_base
+# FROM mcopik/clang-dfsan:libunwind-dfsan-9.0 as libunwind_base
+# FROM mcopik/clang-dfsan:openmp-9.0 as openmp_base
+
+# COPY --from=clang_base /opt/llvm /opt/llvm_dfsan
+# COPY --from=libunwind_base /opt/llvm /opt/llvm_dfsan
+# COPY --from=libcxx_base /opt/llvm /opt/llvm_dfsan
+# COPY --from=openmp_base /opt/llvm /opt/llvm_dfsan
+
+FROM mcopik/clang-dfsan:dfsan-9.0 as dfsan
+COPY --from=dfsan /opt/llvm /opt/llvm_dfsan
+ADD dfsan_components/dfsan_abilist.txt /opt/llvm_dfsan/
+
+ADD dfsan_components/clang-dfsan /opt/llvm_dfsan/bin/
+ADD dfsan_components/clang++-dfsan /opt/llvm_dfsan/bin/
+USER root
+RUN chmod +x /opt/llvm_dfsan/bin/clang-dfsan && chmod +x /opt/llvm_dfsan/bin/clang++-dfsan
+ENV PATH=$PATH:/opt/llvm_dfsan/bin/
+
+# Build the benchmarks
 
 RUN useradd postgres
 
@@ -99,6 +126,8 @@ WORKDIR /app/AFL_info_leakage/custom_mutators/Grammar-Mutator
 RUN make GRAMMAR_FILE=grammars/sql_grammar.json
 
 COPY ./leakage_test /app/leakage_test
+
+RUN echo "test"
 
 RUN if [[ -z "${VANILLA}" ]]; then \
       echo "INSTALLING AFL_INFO_LEAKAGE"; \

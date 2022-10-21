@@ -4,16 +4,22 @@
 #include <algorithm>
 #include <cstdio>
 #include <cstdlib>
+
+#ifdef DFSAN
+#  include <sanitizer/dfsan_interface.h>
+#endif
+
 extern "C" {
   #include <stdint.h>
   #include <unistd.h>
   #include <string.h>
+#if !defined MSAN && !defined DFSAN
   #include "decode_inputs.h"
+#endif
 }
 
 #ifdef DFSAN
-    dfsan_label public_label = 1;
-    dfsan_label secret_label = 2;
+    dfsan_label secret_label = 1;
 #endif
 
 class Review {
@@ -43,6 +49,9 @@ public:
 
 	void sendNotifications() {
 		std::sort(reviews.begin(), reviews.end(), compare);
+#ifdef DFSAN
+    assert(!dfsan_has_label(dfsan_read_label(&reviews, sizeof(reviews)), secret_label));
+#endif
 		for (int i = 0; i < reviews.size(); i++) {
 			Review *r = &reviews[i];
 			std::cout << "---" << std::endl;
@@ -88,8 +97,7 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t *Data, uint32_t length) {
   }
 
 #ifdef DFSAN
-    dfsan_set_label(public_label, public_in, public_len);
-    dfsan_set_label(secret_label, secret_in, secret_len + 1);
+    dfsan_set_label(secret_label, secret_in, secret_len);
 #endif
 
   int secretPos = 0, publicPos = 0;

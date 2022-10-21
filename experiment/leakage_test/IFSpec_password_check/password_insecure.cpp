@@ -2,16 +2,22 @@
 #include <iostream>
 #include <cstdio>
 #include <cstdlib>
+
+#ifdef DFSAN
+#  include <sanitizer/dfsan_interface.h>
+#endif
+
 extern "C" {
   #include <stdint.h>
   #include <unistd.h>
   #include <string.h>
+#if !defined MSAN && !defined DFSAN
   #include "decode_inputs.h"
+#endif
 }
 
 #ifdef DFSAN
-    dfsan_label public_label = 1;
-    dfsan_label secret_label = 2;
+    dfsan_label secret_label = 1;
 #endif
 
 class PasswordManager {
@@ -46,7 +52,11 @@ public:
 				invalidTries++;
 			}
 		} else {
-			std::cout << "No more password tries allowed" << std::endl;
+      std::string message = "No more password tries allowed";
+#ifdef DFSAN
+      assert(!dfsan_has_label(dfsan_read_label(&message, sizeof(message)), secret_label));
+#endif
+			std::cout << message << std::endl;
 		}
 	}
 };
@@ -88,8 +98,7 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t *Data, uint32_t length) {
   str[public_len] = 0; // terminate the string
 
 #ifdef DFSAN
-    dfsan_set_label(public_label, str, public_len + 1);
-    dfsan_set_label(secret_label, &passwordAttempts, sizeof(passwordAttempts));
+  dfsan_set_label(secret_label, &passwordAttempts, sizeof(passwordAttempts));
 #endif
 
   char *input, *temp;

@@ -1,22 +1,31 @@
 #include <iostream>
 #include <string>
 #include <cstdio>
+
+#ifdef DFSAN
+#  include <sanitizer/dfsan_interface.h>
+#endif
+
 extern "C" {
   #include <unistd.h>
   #include <stdint.h>
   #include <stdlib.h>
   #include <string.h>
+#if !defined MSAN && !defined DFSAN
   #include "decode_inputs.h"
+#endif
 }
 
 #ifdef DFSAN
-    dfsan_label public_label = 1;
-    dfsan_label secret_label = 2;
+    dfsan_label secret_label = 1;
 #endif
 
 class ErrorLog {
 public:
     void logError(std::string message) {
+#ifdef DFSAN
+        assert(!dfsan_has_label(dfsan_read_label(&message, sizeof(message)), secret_label));
+#endif
         std::cout << message << std::endl;
     }
 };
@@ -133,7 +142,6 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t *Data, uint32_t length) {
     double transfer = converter.floatVal;
 
 #ifdef DFSAN
-    dfsan_set_label(public_label, &transfer, sizeof(transfer));
     dfsan_set_label(secret_label, &deposit, sizeof(deposit));
 #endif
 

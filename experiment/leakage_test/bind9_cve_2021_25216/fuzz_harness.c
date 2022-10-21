@@ -76,7 +76,7 @@ int LLVMFuzzerTestOneInput(const uint8_t *data, uint32_t len) {
 
 #ifdef VANILLA_AFL
     oid target;
-    if (len < 4) continue;
+    if (len < 4) return 1;
     size_t size = data[0] << 24 | data[1] << 16 | data[2] << 8 | data[3];
 
     if (!der_get_oid(data + 4, len, &target, &size)) {
