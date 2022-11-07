@@ -2,10 +2,11 @@
 
 INPUT=$@
 
-clang++ -rtlib=compiler-rt\
+# -fsanitize-blacklist=/opt/llvm_dfsan/share/dfsan_abilist.txt\
+
+afl-c++ -rtlib=compiler-rt\
   -I /opt/llvm_dfsan/include/c++/v1/\
   -fsanitize=dataflow\
-  -fsanitize-blacklist=/opt/llvm_dfsan/share/dfsan_abilist.txt\
   -stdlib=libc++\
   "$@"\
   -L /opt/llvm_dfsan/lib\

@@ -13,6 +13,7 @@ extern "C" {
   #include <stdint.h>
   #include <unistd.h>
   #include <string.h>
+  #include <assert.h>
 #if !defined MSAN && !defined DFSAN
   #include "decode_inputs.h"
 #endif
@@ -65,7 +66,19 @@ private:
 	std::vector<Review> reviews;
 };
 
+#ifdef DFSAN
+int main(void) {
+
+    char *Data = (char *)malloc(1024*1024+1);
+    int length = read(STDIN_FILENO, Data, 1024*1024+1);
+    if (length == -1 || length == 1024*1024+1) {
+        printf("Error! too long\n");
+        exit(1);
+    }
+#else
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t *Data, uint32_t length) {
+#endif
+
   ReviewProcess rp = ReviewProcess();
 
   uint8_t *public_in, *secret_in;

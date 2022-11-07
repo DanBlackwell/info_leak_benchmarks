@@ -1,3 +1,4 @@
+FROM mcopik/clang-dfsan:dfsan-9.0 AS dfsan
 FROM ubuntu:20.04 AS aflplusplus
 
 ARG VANILLA=""
@@ -39,20 +40,28 @@ RUN echo "deb http://apt.llvm.org/focal/ llvm-toolchain-focal-12 main" >> /etc/a
 RUN echo "deb http://ppa.launchpad.net/ubuntu-toolchain-r/test/ubuntu focal main" >> /etc/apt/sources.list && \
     apt-key adv --recv-keys --keyserver keyserver.ubuntu.com 1E9377A2BA9EF27F
 
-RUN apt-get update && apt-get full-upgrade -y && \
-    apt-get -y install --no-install-suggests --no-install-recommends \
-    gcc-10 g++-10 gcc-10-plugin-dev gcc-10-multilib gcc-multilib gdb lcov \
-    clang-12 clang-tools-12 libc++1-12 libc++-12-dev \
-    libc++abi1-12 libc++abi-12-dev libclang1-12 libclang-12-dev \
-    libclang-common-12-dev libclang-cpp12 libclang-cpp12-dev liblld-12 \
-    liblld-12-dev liblldb-12 liblldb-12-dev libllvm12 libomp-12-dev \
-    libomp5-12 lld-12 lldb-12 llvm-12 llvm-12-dev llvm-12-runtime llvm-12-tools \
-    && rm -rf /var/lib/apt/lists/*
+RUN if [[ -z "${VANILLA}" ]]; then \
+      apt-get update && apt-get full-upgrade -y && \
+      apt-get -y install --no-install-suggests --no-install-recommends \
+      gcc-10 g++-10 gcc-10-plugin-dev gcc-10-multilib gcc-multilib gdb lcov \
+      clang-12 clang-tools-12 libc++1-12 libc++-12-dev \
+      libc++abi1-12 libc++abi-12-dev libclang1-12 libclang-12-dev \
+      libclang-common-12-dev libclang-cpp12 libclang-cpp12-dev liblld-12 \
+      liblld-12-dev liblldb-12 liblldb-12-dev libllvm12 libomp-12-dev \
+      libomp5-12 lld-12 lldb-12 llvm-12 llvm-12-dev llvm-12-runtime llvm-12-tools \
+      && rm -rf /var/lib/apt/lists/*; \
+    else \
+      apt-get update && apt-get full-upgrade -y && \
+      apt-get -y install --no-install-suggests --no-install-recommends \
+      gcc-10 g++-10 gcc-10-plugin-dev gcc-10-multilib gcc-multilib gdb lcov \
+      && rm -rf /var/lib/apt/lists/*; \
+    fi
 
 RUN update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-10 0
 RUN update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-10 0
 
-ENV LLVM_CONFIG=llvm-config-12
+#ENV LLVM_CONFIG=llvm-config-12
+ENV LLVM_CONFIG=llvm-config
 ENV AFL_SKIP_CPUFREQ=1
 ENV AFL_TRY_AFFINITY=1
 ENV AFL_I_DONT_CARE_ABOUT_MISSING_CRASHES=1
@@ -69,9 +78,8 @@ ENV AFL_I_DONT_CARE_ABOUT_MISSING_CRASHES=1
 # COPY --from=libcxx_base /opt/llvm /opt/llvm_dfsan
 # COPY --from=openmp_base /opt/llvm /opt/llvm_dfsan
 
-FROM mcopik/clang-dfsan:dfsan-9.0 as dfsan
 COPY --from=dfsan /opt/llvm /opt/llvm_dfsan
-ADD dfsan_components/dfsan_abilist.txt /opt/llvm_dfsan/
+ADD dfsan_components/dfsan_abilist.txt /opt/llvm_dfsan/share/dfsan_abilist.txt
 
 ADD dfsan_components/clang-dfsan /opt/llvm_dfsan/bin/
 ADD dfsan_components/clang++-dfsan /opt/llvm_dfsan/bin/
@@ -129,12 +137,17 @@ COPY ./leakage_test /app/leakage_test
 
 RUN echo "test"
 
+
+ENV CXX=/opt/llvm_dfsan/bin/clang++-dfsan
+
 RUN if [[ -z "${VANILLA}" ]]; then \
       echo "INSTALLING AFL_INFO_LEAKAGE"; \
       cd /app/AFL_info_leakage; make install; \
     else \
       echo "INSTALLING AFL_VANILLA"; \
       cd /app/AFL_vanilla; make install; \
+      export CC=/opt/llvm_dfsan/bin/clang-dfsan; \
+      export CXX=/opt/llvm_dfsan/bin/clang++-dfsan; \
     fi
 
 WORKDIR /app/leakage_test/NetworkManager_CVE-2011-1943
