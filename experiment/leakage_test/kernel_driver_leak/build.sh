@@ -5,6 +5,12 @@ EXTRA_FILES=""
 if ! [[ -z "${VANILLA}" ]]; then
   CFLAGS="-D VANILLA_AFL"
   export AFL_USE_MSAN=1
+
+elif ! [[ -z "${CBMC}" ]]; then
+  echo "BUILDING WITH CBMC"
+  goto-cc cbmc_harness.c --function cbmc_test -Irepo -lm -o test
+  exit 0
+
 else
   CFLAGS="-Wl,--wrap=malloc"
 

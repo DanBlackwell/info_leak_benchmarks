@@ -4,9 +4,9 @@
 #include <unistd.h>
 #include <stdint.h>
 #include "json.h"
-#include "base64.h"
-#include "atalk.h"
-#ifndef VANILLA_AFL
+#if !defined VANILLA_AFL && !defined CBMC
+  #include "base64.h"
+  #include "atalk.h"
   #include "decode_inputs.h"
   #include "memory.h"
 #endif
@@ -78,6 +78,7 @@ int LLVMFuzzerTestOneInput(const uint8_t *Data, uint32_t length) {
 #endif
 
   atptr uaddr = (atptr)calloc(1, sizeof(struct atalk_sock));
+  if (!uaddr) goto cleanup;
   int peer = *(int *)(Data + sizeof(struct atalk_sock)) % 2;
 
 #ifndef VANILLA_AFL
@@ -96,7 +97,36 @@ int LLVMFuzzerTestOneInput(const uint8_t *Data, uint32_t length) {
   }
   printf("\n");
   free(uaddr);
+cleanup:
+  free(public_in);
+  free(secret_in);
 
   return 0;
 }
 
+#ifdef CBMC
+void cbmc_test(struct atalk_sock sock, int peer) {
+  struct atalk_sock *out1, *out2;
+
+  out1 = (struct atalk_sock *)malloc(sizeof(struct atalk_sock));
+  if (!out1) return;
+  out2 = (struct atalk_sock *)malloc(sizeof(struct atalk_sock));
+  if (!out2) { 
+    free(out1);
+    return;
+  }
+
+  memset(out1, 0, sizeof(*out1));
+  memset(out2, 0, sizeof(*out2));
+
+  int res1 = atalk_getname(&sock, out1, peer);
+  int res2 = atalk_getname(&sock, out2, peer);
+
+  assert(res1 == res2);
+  assert(memcmp(out1, out2, sizeof(*out1)) == 0);
+
+  free(out1);
+  free(out2);
+}
+
+#endif

@@ -1,5 +1,8 @@
+FROM diffblue/cbmc:5.69.1 AS cbmc
 FROM mcopik/clang-dfsan:dfsan-9.0 AS dfsan
 FROM ubuntu:20.04 AS aflplusplus
+
+COPY --from=cbmc /usr/local/bin/* /usr/local/bin/
 
 ARG VANILLA=""
 ENV VANILLA=${VANILLA}
@@ -67,16 +70,6 @@ ENV AFL_TRY_AFFINITY=1
 ENV AFL_I_DONT_CARE_ABOUT_MISSING_CRASHES=1
 
 # install DFSan version of clang and libcxx
-
-# FROM mcopik/clang-dfsan:clang-dfsan-9.0 as clang_base
-# FROM mcopik/clang-dfsan:libcxx-dfsan-9.0 as libcxx_base
-# FROM mcopik/clang-dfsan:libunwind-dfsan-9.0 as libunwind_base
-# FROM mcopik/clang-dfsan:openmp-9.0 as openmp_base
-
-# COPY --from=clang_base /opt/llvm /opt/llvm_dfsan
-# COPY --from=libunwind_base /opt/llvm /opt/llvm_dfsan
-# COPY --from=libcxx_base /opt/llvm /opt/llvm_dfsan
-# COPY --from=openmp_base /opt/llvm /opt/llvm_dfsan
 
 COPY --from=dfsan /opt/llvm /opt/llvm_dfsan
 ADD dfsan_components/dfsan_abilist.txt /opt/llvm_dfsan/share/dfsan_abilist.txt
