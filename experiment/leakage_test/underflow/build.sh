@@ -8,7 +8,6 @@ if ! [[ -z "${VANILLA}" ]]; then
 
 elif ! [[ -z "${CBMC}" ]]; then
   goto-cc repo/cbmc_harness.c -D CBMC --function cbmc_test -o test
-  cbmc test
   exit 0
 
 else

@@ -8,8 +8,7 @@ if ! [[ -z "${VANILLA}" ]]; then
   export AFL_USE_MSAN=1
 
 elif ! [[ -z "${CBMC}" ]]; then
-  goto-cc repo/atalk.c -D CBMC -Irepo --function cbmc_test -o test
-  cbmc test
+  goto-cc repo/cbmc_harness.c -D CBMC -Irepo --function cbmc_test -o test
   exit 0
 
 else

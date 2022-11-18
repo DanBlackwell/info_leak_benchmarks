@@ -7,6 +7,9 @@ COPY --from=cbmc /usr/local/bin/* /usr/local/bin/
 ARG VANILLA=""
 ENV VANILLA=${VANILLA}
 
+ARG CBMC=""
+ENV CBMC=${CBMC}
+
 # Build and install AFL++ and dependencies
 
 LABEL "maintainer"="afl++ team <afl@aflplus.plus>"
@@ -43,7 +46,17 @@ RUN echo "deb http://apt.llvm.org/focal/ llvm-toolchain-focal-12 main" >> /etc/a
 RUN echo "deb http://ppa.launchpad.net/ubuntu-toolchain-r/test/ubuntu focal main" >> /etc/apt/sources.list && \
     apt-key adv --recv-keys --keyserver keyserver.ubuntu.com 1E9377A2BA9EF27F
 
-RUN if [[ -z "${VANILLA}" ]]; then \
+RUN if ! [[ -z "${VANILLA}" ]]; then \
+      apt-get update && apt-get full-upgrade -y && \
+      apt-get -y install --no-install-suggests --no-install-recommends \
+      gcc-10 g++-10 gcc-10-plugin-dev gcc-10-multilib gcc-multilib gdb lcov \
+      && rm -rf /var/lib/apt/lists/*; \
+    elif ! [[ -z "${CBMC}" ]]; then \
+      apt-get update && apt-get full-upgrade -y && \
+      apt-get -y install --no-install-suggests --no-install-recommends \
+      gcc-10 g++-10 gcc-10-plugin-dev gcc-10-multilib gcc-multilib gdb lcov \
+      && rm -rf /var/lib/apt/lists/*; \
+    else \
       apt-get update && apt-get full-upgrade -y && \
       apt-get -y install --no-install-suggests --no-install-recommends \
       gcc-10 g++-10 gcc-10-plugin-dev gcc-10-multilib gcc-multilib gdb lcov \
@@ -52,11 +65,6 @@ RUN if [[ -z "${VANILLA}" ]]; then \
       libclang-common-12-dev libclang-cpp12 libclang-cpp12-dev liblld-12 \
       liblld-12-dev liblldb-12 liblldb-12-dev libllvm12 libomp-12-dev \
       libomp5-12 lld-12 lldb-12 llvm-12 llvm-12-dev llvm-12-runtime llvm-12-tools \
-      && rm -rf /var/lib/apt/lists/*; \
-    else \
-      apt-get update && apt-get full-upgrade -y && \
-      apt-get -y install --no-install-suggests --no-install-recommends \
-      gcc-10 g++-10 gcc-10-plugin-dev gcc-10-multilib gcc-multilib gdb lcov \
       && rm -rf /var/lib/apt/lists/*; \
     fi
 
@@ -128,28 +136,24 @@ RUN make GRAMMAR_FILE=grammars/sql_grammar.json
 
 COPY ./leakage_test /app/leakage_test
 
-RUN echo "test"
-
-
 ENV CXX=/opt/llvm_dfsan/bin/clang++-dfsan
 
-RUN if [[ -z "${VANILLA}" ]]; then \
-      echo "INSTALLING AFL_INFO_LEAKAGE"; \
-      cd /app/AFL_info_leakage; make install; \
-    else \
+RUN if ! [[ -z "${VANILLA}" ]]; then \
       echo "INSTALLING AFL_VANILLA"; \
       cd /app/AFL_vanilla; make install; \
       export CC=/opt/llvm_dfsan/bin/clang-dfsan; \
       export CXX=/opt/llvm_dfsan/bin/clang++-dfsan; \
+    elif ! [[ -z "${CBMC}" ]]; then \
+      echo "INSTALLING CBMC TESTS"; \
+    else \
+      echo "INSTALLING AFL_INFO_LEAKAGE"; \
+      cd /app/AFL_info_leakage; make install; \
     fi
 
 WORKDIR /app/leakage_test/NetworkManager_CVE-2011-1943
 RUN ./build.sh
 
 WORKDIR /app/leakage_test/atalk
-RUN ./build.sh
-
-WORKDIR /app/leakage_test/bind9_cve_2021_25216
 RUN ./build.sh
 
 WORKDIR /app/leakage_test/rds_kernel_CVE-2019-16714
@@ -177,8 +181,14 @@ WORKDIR /app/leakage_test/kernel_driver_leak/
 RUN ./build.sh
 
 COPY ./fuzz_all_subjects.sh /app/
+COPY ./model_check_all_subjects.sh /app/
 
 ENV VANILLA ${VANILLA}
+ENV CBMC ${CBMC}
 
 WORKDIR /app/
-CMD ./fuzz_all_subjects.sh 86400
+CMD if ! [[ -z "${CBMC}" ]]; then \
+      ./model_check_all_subjects.sh 86400; \
+    else \
+      ./fuzz_all_subjects.sh 86400; \
+    fi

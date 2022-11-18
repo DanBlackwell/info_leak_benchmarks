@@ -47,5 +47,4 @@ int main(void) {
 
   free(public_in);
   free(secret_in);
-
 }

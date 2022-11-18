@@ -3,11 +3,8 @@
 CFLAGS=""
 EXTRA_FILES=""
 if ! [[ -z "${VANILLA}" ]]; then
-  # CFLAGS="-D MSAN"
-  # export AFL_USE_MSAN=1
-
   CXX="clang++-dfsan"
-  CFLAGS="-D DFSAN"
+  CFLAGS="-D VANILLA_AFL"
 else
   CXX="afl-clang-fast++"
   CFLAGS="-fsanitize=fuzzer -Wl,--wrap=malloc"

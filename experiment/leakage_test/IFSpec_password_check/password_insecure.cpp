@@ -3,6 +3,10 @@
 #include <cstdio>
 #include <cstdlib>
 
+#ifdef VANILLA_AFL
+#  define DFSAN
+#endif 
+
 #ifdef DFSAN
 #  include <sanitizer/dfsan_interface.h>
 #endif
@@ -12,7 +16,7 @@ extern "C" {
   #include <unistd.h>
   #include <string.h>
   #include <assert.h>
-#if !defined MSAN && !defined DFSAN
+#ifndef DFSAN
   #include "decode_inputs.h"
 #endif
 }
@@ -79,7 +83,7 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t *Data, uint32_t length) {
   
   uint8_t *public_in, *secret_in;
   uint32_t public_len, secret_len;
-#if defined MSAN || defined DFSAN
+#ifdef DFSAN
     public_in = (uint8_t *)Data;
     public_len = length < 8 ? length : 8;
     secret_in = (uint8_t *)Data + public_len;
@@ -127,7 +131,7 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t *Data, uint32_t length) {
 
   std::cout << "Run completed, run again" << std::endl;
 
-#if defined MSAN || defined DFSAN
+#ifdef DFSAN
     // no need to free anything
 #else
   free(public_in);
