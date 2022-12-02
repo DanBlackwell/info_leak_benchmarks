@@ -6,6 +6,7 @@ if ! [[ $1 =~ $re ]] || [ $# -ne 1 ]; then
   exit 0
 fi
 
-timeout $1 afl-fuzz -i IN -o OUT -- ./fuzz @@ > fuzzing.log 2>&1 &
+/usr/bin/time -v timeout $1 afl-fuzz -i IN -o OUT -- ./fuzz @@ > fuzzing.log 2>&1 &
+cp model_check.log ../results/$(basename pwd)_model_check.log
 
 wait
