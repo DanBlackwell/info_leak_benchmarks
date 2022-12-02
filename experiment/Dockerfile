@@ -37,7 +37,7 @@ RUN apt-get update && \
     gnuplot-nox \
     gtk-doc-tools autopoint intltool libdbus-glib-1-dev \
     valgrind uuid-dev default-jre python3 zip \
-    binutils libc6-dev \
+    binutils libc6-dev time \
     && rm -rf /var/lib/apt/lists/*
 
 RUN echo "deb http://apt.llvm.org/focal/ llvm-toolchain-focal-12 main" >> /etc/apt/sources.list && \

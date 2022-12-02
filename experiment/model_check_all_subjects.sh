@@ -9,6 +9,7 @@ fi
 echo "WILL BEGIN MODEL CHECKING WITH TIMEOUT OF $(( $1 / 3600 )) hours"
 
 cd "$(dirname "${BASH_SOURCE[0]}")"
+mkdir -p leakage_test/results
 
 for F in leakage_test/*/; do
   pushd $F;
@@ -18,7 +19,8 @@ for F in leakage_test/*/; do
     fi
 
     echo "Beginning model checking $(basename $F)"
-    timeout $1 ./model_check.sh
+    # model check with timeout $1
+    ./model_check.sh $1
   popd
 done
 
