@@ -9,6 +9,7 @@ fi
 echo "WILL BEGIN FUZZING WITH TIMEOUT OF $(( $1 / 3600 )) hours"
 
 cd "$(dirname "${BASH_SOURCE[0]}")"
+mkdir -p leakage_test/results
 
 for F in leakage_test/*/; do
   pushd $F;
