@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <stdint.h>
+#include <string.h>
 #include "atalk.h"
 
 #ifndef VANILLA_AFL
@@ -99,8 +100,10 @@ int LLVMFuzzerTestOneInput(const uint8_t *Data, uint32_t length) {
   printf("\n");
   free(uaddr);
 cleanup:
+#ifndef VANILLA_AFL
   free(public_in);
   free(secret_in);
+#endif
 
   return 0;
 }
