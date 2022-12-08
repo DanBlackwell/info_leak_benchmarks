@@ -1,10 +1,12 @@
 #!/bin/bash
 
+CC="afl-clang-fast"
 CFLAGS=""
 EXTRA_FILES=""
 if ! [[ -z "${VANILLA}" ]]; then
   CFLAGS="-D VANILLA_AFL"
-  export AFL_USE_MSAN=1
+  CC="clang-dfsan"
+  # export AFL_USE_MSAN=1
 
 elif ! [[ -z "${CBMC}" ]]; then
   goto-cc repo/cbmc_harness.c -D CBMC --function cbmc_test -o test
@@ -21,6 +23,6 @@ else
   EXTRA_FILES="m.o d.o b.o j.o"
 fi
 
-afl-clang-fast -fsanitize=fuzzer $CFLAGS repo/underflow.c $EXTRA_FILES -I../ -lm -o fuzz
+$CC -fsanitize=fuzzer $CFLAGS repo/underflow.c $EXTRA_FILES -I../ -lm -o fuzz
 
 rm -f *.o
