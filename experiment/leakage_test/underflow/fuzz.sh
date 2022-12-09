@@ -6,7 +6,13 @@ if ! [[ $1 =~ $re ]] || [ $# -ne 1 ]; then
   exit 0
 fi
 
-/usr/bin/time -v timeout $1 afl-fuzz -i IN -o OUT -- ./fuzz @@ > fuzzing.log 2>&1 &
+if ! [[ -z "${VANILLA}" ]]; then
+  IN_DIR="IN_VANILLA"
+else
+  IN_DIR="IN"
+fi
+
+/usr/bin/time -v timeout $1 afl-fuzz -i $IN_DIR -o OUT -- ./fuzz @@ > fuzzing.log 2>&1 &
 cp fuzzing.log ../results/$(basename $PWD)_fuzzing.log
 
 wait

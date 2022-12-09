@@ -13,7 +13,7 @@ elif ! [[ -z "${CBMC}" ]]; then
   exit 0
 
 else
-  CFLAGS="-Wl,--wrap=malloc"
+  CFLAGS="-Wl,--wrap=malloc -fsanitize=fuzzer"
 
   gcc -O3 -c ../memory.c -o m.o
   gcc -O3 -c ../decode_inputs.c -o d.o
@@ -23,6 +23,6 @@ else
   EXTRA_FILES="m.o d.o b.o j.o"
 fi
 
-$CC -fsanitize=fuzzer $CFLAGS repo/underflow.c $EXTRA_FILES -I../ -lm -o fuzz
+$CC $CFLAGS repo/underflow.c $EXTRA_FILES -I../ -lm -o fuzz
 
 rm -f *.o

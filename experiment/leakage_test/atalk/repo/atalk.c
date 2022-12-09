@@ -53,7 +53,7 @@ out:
 int LLVMFuzzerTestOneInput(const uint8_t *Data, uint32_t length) {
 
 #ifdef VANILLA_AFL
-  if (length < sizeof(struct atalk_sock)) {
+  if (length < sizeof(struct atalk_sock) + sizeof(int)) {
     return 1;
   }
   atptr sock = (atptr)Data;
@@ -66,7 +66,7 @@ int LLVMFuzzerTestOneInput(const uint8_t *Data, uint32_t length) {
     return 1;
   }
 
-  if (public_len != sizeof(struct atalk_sock) + 4) {
+  if (public_len != sizeof(struct atalk_sock) + sizeof(int)) {
     printf("Expected public len %lu, was %u bytes\n", sizeof(struct atalk_sock) + 4, public_len);
     exit(1);
   }

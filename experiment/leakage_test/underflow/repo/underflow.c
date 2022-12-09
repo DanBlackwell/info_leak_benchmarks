@@ -64,9 +64,9 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t *Data, uint32_t length) {
   if (length != sizeof(ppos) + sizeof(h)) {
     return 1;
   }
-  public_in = (uint8_t *)data;
+  public_in = (uint8_t *)Data;
   public_len = sizeof(ppos);
-  secret_in = (uint8_t *)data + public_len;
+  secret_in = (uint8_t *)Data + public_len;
   secret_len = sizeof(h);
 
   dfsan_set_label(secret_label, secret_in, secret_len);
@@ -96,7 +96,7 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t *Data, uint32_t length) {
   printf("%d\n", res);
 
 #ifdef DFSAN
-  assert(!dfsan_has_label(dfsan_read_label(res, sizeof(res)), secret_label));
+  assert(!dfsan_has_label(dfsan_read_label(&res, sizeof(res)), secret_label));
 #endif
 
   return 0;
