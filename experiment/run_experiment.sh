@@ -14,8 +14,8 @@ VANILLA_AFL=1
 DOCKER_ARGS=""
 
 if ! [[ -z "${VANILLA_AFL}" ]]; then
-  echo "Building AFL_info_leakage experiment"
-  OUTPUT_DIR="../experimental_results/$(hostname)_$(date -d "today" +"%Y_%m_%d_%H%M")"
+  echo "Building VANILLA AFL experiment"
+  OUTPUT_DIR="../experimental_results_vanilla/$(hostname)_$(date -d "today" +"%Y_%m_%d_%H%M")"
   NAME="vanilla_leaks_exp"
   DOCKER_ARGS="--build-arg VANILLA=1"
 elif ! [[ -z "${CBMC}" ]]; then
@@ -24,8 +24,8 @@ elif ! [[ -z "${CBMC}" ]]; then
   NAME="cbmc_leaks_exp"
   DOCKER_ARGS="--build-arg CBMC=1"
 else
-  echo "Building VANILLA AFL experiment"
-  OUTPUT_DIR="../experimental_results_vanilla/$(hostname)_$(date -d "today" +"%Y_%m_%d_%H%M")"
+  echo "Building AFL_info_leakage experiment"
+  OUTPUT_DIR="../experimental_results/$(hostname)_$(date -d "today" +"%Y_%m_%d_%H%M")"
   NAME="leakfuzzer_leaks_exp"
 fi
 mkdir -p $OUTPUT_DIR
