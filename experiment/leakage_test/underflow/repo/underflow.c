@@ -52,7 +52,7 @@ int main(void) {
         exit(1);
     }
 #else
-extern "C" int LLVMFuzzerTestOneInput(const uint8_t *Data, uint32_t length) {
+int LLVMFuzzerTestOneInput(const uint8_t *Data, uint32_t length) {
 #endif
   int h = 0;
   int64_t ppos;
@@ -71,7 +71,7 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t *Data, uint32_t length) {
 
   dfsan_set_label(secret_label, secret_in, secret_len);
 #else
-  find_public_and_secret_inputs((const char *)data, length,
+  find_public_and_secret_inputs((const char *)Data, length,
                                 &public_in, &public_len,
                                 &secret_in, &secret_len);
   if (!public_in || !secret_in) {

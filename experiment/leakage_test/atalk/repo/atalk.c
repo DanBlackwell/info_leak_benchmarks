@@ -86,9 +86,6 @@ int LLVMFuzzerTestOneInput(const uint8_t *Data, uint32_t length) {
 #ifndef VANILLA_AFL
   SEED_MEMORY(seed);
   FILL_STACK();
-  // Push the stack down some so we know the next function call will be filled
-  volatile int *__stack_bumper = (int *)alloca(100);
-  __stack_bumper[0] = 1;
 #endif
 
   int res = atalk_getname(sock, uaddr, peer);

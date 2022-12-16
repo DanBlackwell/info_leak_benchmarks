@@ -10,7 +10,7 @@ fi
 SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 cd $SCRIPT_DIR
 
-VANILLA_AFL=1
+# VANILLA_AFL=1
 DOCKER_ARGS=""
 
 if ! [[ -z "${VANILLA_AFL}" ]]; then
