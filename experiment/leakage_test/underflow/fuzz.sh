@@ -12,7 +12,5 @@ else
   IN_DIR="IN"
 fi
 
-/usr/bin/time -v timeout $1 afl-fuzz -i $IN_DIR -o OUT -- ./fuzz @@ > fuzzing.log 2>&1 &
+/usr/bin/time -v timeout $1 afl-fuzz -i $IN_DIR -o OUT -- ./fuzz @@ > fuzzing.log 2>&1
 cp fuzzing.log ../results/$(basename $PWD)_fuzzing.log
-
-wait
