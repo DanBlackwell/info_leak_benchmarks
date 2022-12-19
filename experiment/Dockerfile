@@ -151,34 +151,34 @@ RUN if ! [[ -z "${VANILLA}" ]]; then \
     fi
 
 WORKDIR /app/leakage_test/NetworkManager_CVE-2011-1943
-RUN ./build.sh
+RUN ./build.sh > build.log 2>&1
 
 WORKDIR /app/leakage_test/atalk
-RUN ./build.sh
+RUN ./build.sh > build.log 2>&1
 
 WORKDIR /app/leakage_test/rds_kernel_CVE-2019-16714
-RUN ./build.sh
+RUN ./build.sh > build.log 2>&1
 
 WORKDIR /app/leakage_test/underflow
-RUN ./build.sh
+RUN ./build.sh > build.log 2>&1
 
 WORKDIR /app/leakage_test/postgres-cve-2021-3393
-RUN ./build.sh
+RUN ./build.sh > build.log 2>&1
 
 WORKDIR /app/leakage_test/OpenSSL_CVE-2014-0160
-RUN ./build.sh
+RUN ./build.sh > build.log 2>&1
 
 WORKDIR /app/leakage_test/IFSpec_banking/
-RUN ./build.sh
+RUN ./build.sh > build.log 2>&1
 
 WORKDIR /app/leakage_test/IFSpec_password_check/
-RUN ./build.sh
+RUN ./build.sh > build.log 2>&1
 
 WORKDIR /app/leakage_test/IFSpec_reviewers/
-RUN ./build.sh
+RUN ./build.sh > build.log 2>&1
 
 WORKDIR /app/leakage_test/kernel_driver_leak/
-RUN ./build.sh
+RUN ./build.sh > build.log 2>&1
 
 COPY ./fuzz_all_subjects.sh /app/
 COPY ./model_check_all_subjects.sh /app/
