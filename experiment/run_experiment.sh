@@ -36,7 +36,7 @@ docker build $DOCKER_ARGS -t $IMAGE .
 # Disable ASLR for the run
 echo 0 | tee /proc/sys/kernel/randomize_va_space
 
-docker container run --ulimit core=0 --name $NAME $IMAGE
+docker container run --shm-size=2g --ulimit core=0 --name $NAME $IMAGE
 
 # Reenable ASLR
 echo 2 | tee /proc/sys/kernel/randomize_va_space
