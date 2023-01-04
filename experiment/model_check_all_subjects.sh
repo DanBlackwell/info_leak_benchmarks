@@ -10,6 +10,7 @@ echo "WILL BEGIN MODEL CHECKING WITH TIMEOUT OF $(( $1 / 3600 )) hours"
 
 cd "$(dirname "${BASH_SOURCE[0]}")"
 mkdir -p leakage_test/results
+cp parse_model_check_results.py leakage_test/results/
 
 for F in leakage_test/*/; do
   pushd $F;
@@ -25,3 +26,7 @@ for F in leakage_test/*/; do
 done
 
 wait
+
+cd leakage_test/results
+  ./parse_model_check_results.py > model_check_results.json
+cd -
