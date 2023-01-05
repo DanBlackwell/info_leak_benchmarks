@@ -2,6 +2,7 @@
 
 import os
 import re
+import json
 
 # from https://stackoverflow.com/a/45960693
 def tail(f, window=20):
@@ -93,6 +94,7 @@ for filename in os.listdir(os.getcwd()):
             earliest = min(time, earliest)
         if len(files) > 0:
             result['first_leak_time'] = earliest
+            result['leaking_pairs'] = int(len(files) / 2)
 
     hangs_dir_path = os.path.join(fuzzer_out_dir, 'hangs')
     result['hang_count'] = len(os.listdir(hangs_dir_path))
@@ -119,7 +121,7 @@ for filename in os.listdir(os.getcwd()):
             matches = re.findall('Command terminated by signal ([0-9]+)', line)
             if len(matches) > 0:
                 result['exit_code'] = int(matches[0])
-                result['segfault'] = exit_code == 11
+                result['segfault'] = result['exit_code'] == 11
 
             matches = re.findall('Elapsed \(wall clock\) time \(h\:mm\:ss or m\:ss\)\: ([0-9:\.]+)', line)
             if len(matches) > 0:
@@ -141,5 +143,5 @@ for filename in os.listdir(os.getcwd()):
 #                        max_memory / pow(1024, 3)))
 
     results[sut] = result
-print(results)
+print(json.dumps(results))
 

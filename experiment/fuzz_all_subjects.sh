@@ -10,7 +10,7 @@ echo "WILL BEGIN FUZZING WITH TIMEOUT OF $(( $1 / 3600 )) hours"
 
 cd "$(dirname "${BASH_SOURCE[0]}")"
 mkdir -p leakage_test/results
-cp parse_fuzzing_results.py leakage_test/results/
+cp scripts/parse_fuzzing_results.py leakage_test/results/
 
 for F in leakage_test/*/; do
   pushd $F;
@@ -25,5 +25,3 @@ for F in leakage_test/*/; do
 done
 
 wait
-
-./parse_fuzzing_results.py > fuzz_results.json

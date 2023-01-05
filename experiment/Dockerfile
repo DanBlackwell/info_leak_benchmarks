@@ -182,6 +182,7 @@ RUN ./build.sh > build.log 2>&1
 
 COPY ./fuzz_all_subjects.sh /app/
 COPY ./model_check_all_subjects.sh /app/
+COPY ./scripts/ /app/
 
 ENV VANILLA ${VANILLA}
 ENV CBMC ${CBMC}
