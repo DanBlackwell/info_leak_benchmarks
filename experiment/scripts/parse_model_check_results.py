@@ -2,6 +2,7 @@
 
 import os
 import re
+import json
 
 results = {}
 
@@ -65,4 +66,6 @@ for filename in os.listdir(os.getcwd()):
             'segfault': segfault
         }
 
-print(results)
+print(json.dumps(results))
+
+
