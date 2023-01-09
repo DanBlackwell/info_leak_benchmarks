@@ -101,7 +101,7 @@ for filename in os.listdir(os.getcwd()):
     hangs_dir_path = os.path.join(fuzzer_out_dir, 'hangs')
     result['hang_count'] = len(os.listdir(hangs_dir_path))
     crashes_dir_path = os.path.join(fuzzer_out_dir, 'crashes')
-    result['crashes_count'] = len(os.listdir(crashes_dir_path))
+    result['crash_count'] = len(os.listdir(crashes_dir_path))
         
     # parse fuzzing log
     exit_found = False
