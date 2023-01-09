@@ -52,12 +52,12 @@ for filename in os.listdir(os.getcwd()):
         'max_memory': 0,
         'leaking_pairs': 0,
         'first_leak_time': -1,
-        'edges_found': 0,
-        'total_edges': 0,
-        'cycles_done': 0,
-        'execs_done': 0,
-        'crash_count': 0,
-        'hang_count': 0
+        'edges_found': -1,
+        'total_edges': -1,
+        'cycles_done': -1,
+        'execs_done': -1,
+        'crash_count': -1,
+        'hang_count': -1
     }
 
     if re.search('\.log', filename) is None:
@@ -77,13 +77,15 @@ for filename in os.listdir(os.getcwd()):
     fuzzer_out_dir = os.path.join(os.path.dirname(os.getcwd()), sut_dir, out_path, 'default')
 
     # parse fuzzer stats
-    with open(os.path.join(fuzzer_out_dir, 'fuzzer_stats')) as f:
-        for line in f.readlines():
-            splitty = line.split(' ')
-            for key in ['cycles_done', 'execs_done', 'edges_found', 'total_edges']:
-                if splitty[0] == key:
-                    result[key] = int(splitty[-1]) 
-
+    stats_path=os.path.join(fuzzer_out_dir, 'fuzzer_stats')
+    if os.path.exists(stats_path):
+        with open(stats_path) as f:
+            for line in f.readlines():
+                splitty = line.split(' ')
+                for key in ['cycles_done', 'execs_done', 'edges_found', 'total_edges']:
+                    if splitty[0] == key:
+                        result[key] = int(splitty[-1]) 
+    
     # parse output dirs
     leaks_dir_path = os.path.join(fuzzer_out_dir, 'leaks')
     if os.path.exists(leaks_dir_path):
