@@ -173,9 +173,7 @@ int main(int argc, char **argv)
   for (int i = 0; i < (secret_len < 4 ? secret_len : 4); i++) {
       seed |= secret_in[i] << 8 * i;
   }
-
   SEED_MEMORY(seed);
-  FILL_STACK();
 
   in = public_in; len = public_len;
 #endif
@@ -195,6 +193,10 @@ int main(int argc, char **argv)
   
   current->sas_ss_sp = &uoss;
   current->sas_ss_size = 1024;
+
+#ifndef VANILLA_AFL
+  FILL_STACK();
+#endif
 
   // execute the function
   do_sigaltstack(&uss, &uoss, 0);

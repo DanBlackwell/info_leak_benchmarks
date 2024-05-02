@@ -1416,8 +1416,6 @@ int main(int argc, char **argv)
   }
 
   SEED_MEMORY(seed);
-  FILL_STACK();
-
   in = public_in; len = public_len;
 #endif
   
@@ -1458,6 +1456,10 @@ int main(int argc, char **argv)
   // printf("seeded: %u, initial: ", seed);
   // for (int i = 0; i < 20; i++) printf("%hhX", skb.data[i]);
   // printf("\n");
+
+#ifndef VANILLA_AFL
+  FILL_STACK();
+#endif
 
   static int res;
   res = tcf_fill_node(&skb, &tp, fh, pid, seq, flags, event);
