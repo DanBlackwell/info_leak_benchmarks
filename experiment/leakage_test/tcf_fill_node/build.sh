@@ -12,6 +12,7 @@ elif ! [[ -z "${CBMC}" ]]; then
 
 else
   CFLAGS="-Wl,--wrap=malloc"
+  export AFL_DONT_OPTIMIZE=1
   
   gcc -O3 -c ../memory.c -o m.o
   gcc -O3 -c ../decode_inputs.c -o d.o
