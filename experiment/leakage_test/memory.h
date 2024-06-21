@@ -1,8 +1,9 @@
 #ifndef MEMORY_INFO_LEAKAGE_H
 #define MEMORY_INFO_LEAKAGE_H
 
-#define SEED_MEMORY(seed) srand(seed);
+#define SEED_MEMORY(seed) srand(seed); initRepeatedVal();
 
+void initRepeatedVal(void);
 void *__wrap_malloc(size_t);
 void *get_stack_top(void);
 void *get_cur_stack_bottom(void);

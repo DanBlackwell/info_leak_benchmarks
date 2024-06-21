@@ -14,16 +14,17 @@ void initRepeatedVal() {
 }
 
 void *__wrap_malloc(size_t bytes) {
-  uint64_t *raw = (uint64_t *)__real_malloc(bytes);
+  size_t paddedBytes = bytes + 8;
+  uint64_t *raw = (uint64_t *)__real_malloc(paddedBytes);
 
   if (!repeatedVal)
     initRepeatedVal();
 
-  uint64_t reps = bytes / sizeof(repeatedVal);
+  uint64_t reps = paddedBytes / sizeof(repeatedVal);
   for (size_t i = 0; i < reps; i++) {
     raw[i] = repeatedVal;
   }
-  for (size_t i = 0; i < bytes % sizeof(repeatedVal); i++) {
+  for (size_t i = 0; i < paddedBytes % sizeof(repeatedVal); i++) {
     ((uint8_t *)(raw + reps))[i] = repeatedVal >> (8 * i) & 0xFF;
   }
 
